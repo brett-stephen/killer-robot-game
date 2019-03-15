@@ -87,6 +87,36 @@ void display(void)
     gluCylinder(quadratic, 0.3, 0.3, 0.2, 32, 32);
   glPopMatrix();
 
+  // Draw the head
+  glPushMatrix();
+    glTranslatef(0.0, 1.2, 0.0);
+    glPushMatrix();
+      // The head isn't quite a cube
+      glScalef(1.0, 0.8, 1.0);
+      glutWireCube(0.7);
+    glPopMatrix();
+    // Draw the eyes
+    glPushMatrix();
+      // Draw the left eye
+      glTranslatef(-0.15, 0.0, 0.35);
+      glScalef(1.0, 1.0, 0.0);
+      glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    glPushMatrix();
+      // Draw the right eye
+      glTranslatef(0.15, 0.0, 0.35);
+      glScalef(1.0, 1.0, 0.0);
+      glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    glPushMatrix();
+    // Draw the antenna
+      glTranslatef(0.0, 0.65, 0.0);
+      glRotatef(90, 1.0, 0.0, 0.0);
+      quadratic = gluNewQuadric();
+      gluCylinder(quadratic, 0.1, 0.1, 0.4, 32, 32);
+    glPopMatrix();
+  glPopMatrix();
+
   glutSwapBuffers();
 }
 
