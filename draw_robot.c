@@ -48,19 +48,22 @@ void draw_robot(void)
   // Draw the main body
   glPushMatrix();
     glScalef(1.0, 1.5, 1.0);
-    glutWireCube(1.0);
+    glutSolidCube(1.0);
   glPopMatrix();
 
   // Draw rectangle on front of  body
   glPushMatrix();
-    glTranslatef(0.0, 0.0, 0.5);
+    glColor3f(0.0, 1.0, 0.0);
+    glTranslatef(0.0, 0.0, 0.51);
     glScalef(0.5, 1.0, 0.0);
-    glutWireCube(1.0);
+    glutSolidCube(1.0);
+    glColor3f(1.0, 0.0, 0.0);
   glPopMatrix();
 
-  // Draw two rectangles on back of body
+  // Draw two triangles on back of body
   glPushMatrix();
-    glTranslatef(0.0, 0.0, -0.5);
+    glColor3f(0.0, 1.0, 0.0);
+    glTranslatef(0.0, 0.0, -0.51);
     glPushMatrix();
       glTranslatef(0.0, 0.0, 0.0);
       draw_triangle(1.0);
@@ -69,15 +72,18 @@ void draw_robot(void)
       glTranslatef(0.0, -0.5, 0.0);
       draw_triangle(1.0);
     glPopMatrix();
+    glColor3f(1.0, 0.0, 0.0);
   glPopMatrix();
 
   // Draw the neck
   glPushMatrix();
+    glColor3f(0.0, 1.0, 0.0);
     glTranslatef(0.0, 0.9, 0.0);
     glRotatef(90, 1.0, 0.0, 0.0);
     GLUquadricObj *quadratic;
     quadratic = gluNewQuadric();
     gluCylinder(quadratic, 0.3, 0.3, 0.2, 32, 32);
+    glColor3f(1.0, 0.0, 0.0);
   glPopMatrix();
 
   // Draw the head
@@ -88,7 +94,6 @@ void draw_robot(void)
       glScalef(1.0, 0.8, 1.0);
       glutWireCube(0.7);
     glPopMatrix();
-    // Draw the eyes
     glPushMatrix();
       // Draw the left eye
       glTranslatef(-0.15, 0.0, 0.35);
@@ -102,7 +107,7 @@ void draw_robot(void)
       glutSolidSphere(0.1, 10, 10);
     glPopMatrix();
     glPushMatrix();
-    // Draw the antenna
+      // Draw the antenna
       glTranslatef(0.0, 0.65, 0.0);
       glRotatef(90, 1.0, 0.0, 0.0);
       quadratic = gluNewQuadric();
@@ -114,7 +119,7 @@ void draw_robot(void)
 void display(void)
 {
   glClearColor(1.0, 1.0, 1.0, 0.0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   gluLookAt(0.1,0.1,0.5,0.0,0.0,0.0,0.0,1.0,0.0);
 
   draw_robot();
@@ -126,6 +131,7 @@ void init (void)
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
    glMatrixMode (GL_PROJECTION);
+   glEnable(GL_DEPTH_TEST);
  	 glLoadIdentity ();
  	 glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
 }
@@ -133,7 +139,7 @@ void init (void)
 int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
+   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
    glutInitWindowSize (250, 250);
    glutInitWindowPosition (100, 100);
    glutCreateWindow ("draw robot");
@@ -142,5 +148,5 @@ int main(int argc, char** argv)
    glutDisplayFunc(display);
    glutIdleFunc(display);
    glutMainLoop();
-   return 0;  
+   return 0;
 }
