@@ -33,22 +33,15 @@ void draw_triangle(double size)
   glEnd();
 }
 
-void display(void)
+void draw_robot(void)
 {
-  printf("Things is %d\n", y_rotate);
-  glClearColor(1.0, 1.0, 1.0, 0.0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  // Start drawing the robot
   glColor3f(1.0, 0.0, 0.0);
-
-  glMatrixMode (GL_PROJECTION);
-	glLoadIdentity ();
-	glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0.1,0.1,0.5,0.0,0.0,0.0,0.0,1.0,0.0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 
   // Press space to rotate object
+  // TODO: Remove this so no import conflict
   glRotatef(y_rotate, 0.0, 1.0, 0.0);
   glRotatef(x_rotate, 1.0, 0.0, 0.0);
 
@@ -116,6 +109,15 @@ void display(void)
       gluCylinder(quadratic, 0.1, 0.1, 0.4, 32, 32);
     glPopMatrix();
   glPopMatrix();
+}
+
+void display(void)
+{
+  glClearColor(1.0, 1.0, 1.0, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  gluLookAt(0.1,0.1,0.5,0.0,0.0,0.0,0.0,1.0,0.0);
+
+  draw_robot();
 
   glutSwapBuffers();
 }
@@ -123,9 +125,9 @@ void display(void)
 void init (void)
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+   glMatrixMode (GL_PROJECTION);
+ 	 glLoadIdentity ();
+ 	 glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
 }
 
 int main(int argc, char** argv)
@@ -140,5 +142,5 @@ int main(int argc, char** argv)
    glutDisplayFunc(display);
    glutIdleFunc(display);
    glutMainLoop();
-   return 0;   /* We'll never be here.*/
+   return 0;  
 }
