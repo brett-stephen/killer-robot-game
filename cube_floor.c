@@ -1,25 +1,37 @@
-/* 
+/*
 Move a cube around with WASD
 
-The cube is only allowed to along a 2 way street, 
-unless it is at an intersection, which are evenly 
-spaced every `BLOCK_LENGTH` units, where it may 
+The cube is only allowed to along a 2 way street,
+unless it is at an intersection, which are evenly
+spaced every `BLOCK_LENGTH` units, where it may
 go FORWARD, BACK, RIGHT, or LEFT.
 
+The cube should face the direction it is pointing.
+
 Ex. Intersections every 2 units
-  |  |  |  |  | 
+  |  |  |  |  |
 --|--|--|--|--|--
   |  |  |  |  |
 --|--|--|--|--|--
-  |  |  |  |  | 
+  |  |  |  |  |
 */
 #include <GL/glut.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 int BLOCK_LENGTH = 2;
 int X_POS = 0;
 int Y_POS = 0;
 int Z_POS = 0;
+
+enum facing
+{
+    FACE_FORWARD,
+    FACE_RIGHT,
+    FACE_BACK,
+    FACE_LEFT
+};
+int FACING_STATE = FACE_FORWARD;
 
 void display(void)
 {
@@ -28,7 +40,28 @@ void display(void)
     glLoadIdentity();
     gluLookAt(0.0, 2.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
     glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
-    glutWireCube(2);
+    switch (FACING_STATE)
+    {
+    // The following directions are based on a teapot
+    // that is drawn facing left. It is likely that we
+    // will draw the robot initally facing the camera,
+    // so these rotations should be modified as such.
+    case FACE_FORWARD:
+        glRotatef(270, 0.0, 1.0, 0.0);
+        break;
+    case FACE_RIGHT:
+        glRotatef(180, 0.0, 1.0, 0.0);
+        break;
+    case FACE_BACK:
+        glRotatef(90, 0.0, 1.0, 0.0);
+        break;
+    case FACE_LEFT:
+        glRotatef(0.0, 0.0, 1.0, 0.0);
+        break;
+    default:
+        break;
+    }
+    glutWireTeapot(2);
     glutSwapBuffers();
 }
 
@@ -70,6 +103,7 @@ void keyboard(unsigned char key, int x, int y)
         if (can_move_x())
         {
             printf("Moving left\n");
+            FACING_STATE = FACE_LEFT;
             X_POS += 1;
         }
         break;
@@ -77,6 +111,7 @@ void keyboard(unsigned char key, int x, int y)
         if (can_move_z())
         {
             printf("Moving back\n");
+            FACING_STATE = FACE_BACK;
             Z_POS -= 1;
         }
         break;
@@ -84,12 +119,14 @@ void keyboard(unsigned char key, int x, int y)
         if (can_move_x())
         {
             printf("Moving right\n");
+            FACING_STATE = FACE_RIGHT;
             X_POS -= 1;
         }
         break;
     case 119: // w
         if (can_move_z())
         {
+            FACING_STATE = FACE_FORWARD;
             printf("Moving forward\n");
             Z_POS += 1;
         }
@@ -115,5 +152,5 @@ int main(int argc, char **argv)
     glutIdleFunc(display);
     glutKeyboardFunc(keyboard);
     glutMainLoop();
-    return 0; 
+    return 0;
 }
