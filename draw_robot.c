@@ -5,24 +5,28 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
+#include "draw_robot.h"
+
+
 int y_rotate = 0;
 int x_rotate = 0;
 
-void cb_keyboard(unsigned char key, int x, int y)
-{
-  switch(key)
-  {
-    case 32:
-      y_rotate += 15;
-      break;
-    case 97:
-      x_rotate += 15;
-      break;
-    default:
-      printf ("KP: No action for %d.\n", key);
-      break;
-  }
-}
+
+// void cb_keyboard(unsigned char key, int x, int y)
+// {
+//   switch(key)
+//   {
+//     case 32:
+//       y_rotate += 15;
+//       break;
+//     case 97:
+//       x_rotate += 15;
+//       break;
+//     default:
+//       printf ("KP: No action for %d.\n", key);
+//       break;
+//   }
+// }
 
 void set_color_red() {glColor3f(1.0, 0.0, 0.0);}
 
@@ -147,16 +151,6 @@ void draw_head()
 
 void draw_robot(void)
 {
-  // Start drawing the robot
-  set_color_default();
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  // Press space to rotate object
-  // TODO: Remove this so no import conflict
-  glRotatef(y_rotate, 0.0, 1.0, 0.0);
-  glRotatef(x_rotate, 1.0, 0.0, 0.0);
-
   draw_body();
   draw_front_rectangle();
   draw_rear_triangles();
@@ -164,35 +158,43 @@ void draw_robot(void)
   draw_head();
 }
 
-void display(void)
-{
-  glClearColor(1.0, 1.0, 1.0, 0.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  gluLookAt(0.1,0.1,0.5,0.0,0.0,0.0,0.0,1.0,0.0);
-  draw_robot();
-  glutSwapBuffers();
-}
+// void display(void)
+// {
+//   glClearColor(1.0, 1.0, 1.0, 0.0);
+//   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//   gluLookAt(0.1,0.1,0.5,0.0,0.0,0.0,0.0,1.0,0.0);
+//     // Start drawing the robot
+//   set_color_default();
+//   glMatrixMode(GL_MODELVIEW);
+//   glLoadIdentity();
+//   // Press space to rotate object
+//   // TODO: Remove this so no import conflict
+//   glRotatef(y_rotate, 0.0, 1.0, 0.0);
+//   glRotatef(x_rotate, 1.0, 0.0, 0.0);
+//   draw_robot();
+//   glutSwapBuffers();
+// }
 
-void init (void)
-{
-   glClearColor (0.0, 0.0, 0.0, 0.0);
-   glMatrixMode (GL_PROJECTION);
-   glEnable(GL_DEPTH_TEST);
- 	 glLoadIdentity ();
- 	 glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
-}
+// void init (void)
+// {
+//    glClearColor (0.0, 0.0, 0.0, 0.0);
+//    glMatrixMode (GL_PROJECTION);
+//    glEnable(GL_DEPTH_TEST);
+//  	 glLoadIdentity ();
+//  	 glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
+// }
 
-int main(int argc, char** argv)
-{
-   glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize (250, 250);
-   glutInitWindowPosition (100, 100);
-   glutCreateWindow ("draw robot");
-   glutKeyboardFunc(&cb_keyboard);
-   init ();
-   glutDisplayFunc(display);
-   glutIdleFunc(display);
-   glutMainLoop();
-   return 0;
-}
+// int main(int argc, char** argv)
+// {
+//    glutInit(&argc, argv);
+//    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+//    glutInitWindowSize (250, 250);
+//    glutInitWindowPosition (100, 100);
+//    glutCreateWindow ("draw robot");
+//    glutKeyboardFunc(&cb_keyboard);
+//    init ();
+//    glutDisplayFunc(display);
+//    glutIdleFunc(display);
+//    glutMainLoop();
+//    return 0;
+// }

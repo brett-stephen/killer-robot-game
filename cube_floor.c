@@ -1,7 +1,7 @@
 /*
 Move a cube around with WASD
 
-The cube is only allowed to along a 2 way street,
+The robot is only allowed to along a 2 way street,
 unless it is at an intersection, which are evenly
 spaced every `BLOCK_LENGTH` units, where it may
 go FORWARD, BACK, RIGHT, or LEFT.
@@ -19,6 +19,8 @@ Ex. Intersections every 2 units
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "draw_robot.h"
+
 int BLOCK_LENGTH = 2;
 int X_POS = 0;
 int Y_POS = 0;
@@ -35,33 +37,30 @@ int FACING_STATE = FACE_FORWARD;
 
 void display(void)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(0.0, 2.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
     glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
     switch (FACING_STATE)
     {
-    // The following directions are based on a teapot
-    // that is drawn facing left. It is likely that we
-    // will draw the robot initally facing the camera,
-    // so these rotations should be modified as such.
     case FACE_FORWARD:
-        glRotatef(270, 0.0, 1.0, 0.0);
+        glRotatef(0.0, 0.0, 1.0, 0.0);
         break;
     case FACE_RIGHT:
-        glRotatef(180, 0.0, 1.0, 0.0);
+        glRotatef(270.0, 0.0, 1.0, 0.0);
         break;
     case FACE_BACK:
-        glRotatef(90, 0.0, 1.0, 0.0);
+        glRotatef(180.0, 0.0, 1.0, 0.0);
         break;
     case FACE_LEFT:
-        glRotatef(0.0, 0.0, 1.0, 0.0);
+        glRotatef(90.0, 0.0, 1.0, 0.0);
         break;
     default:
         break;
     }
-    glutWireTeapot(2);
+    // glutWireTeapot(2);
+    draw_robot();
     glutSwapBuffers();
 }
 
@@ -69,6 +68,7 @@ void init(void)
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glShadeModel(GL_FLAT);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void reshape(int w, int h)
@@ -140,7 +140,7 @@ void keyboard(unsigned char key, int x, int y)
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(250, 250);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
