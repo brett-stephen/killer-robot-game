@@ -2,11 +2,6 @@
 
 Copyright John Zhang (1993)
 
-Done: 
-  - Draw robot POC
-  - Draw square blocks POC
-  - Restrict Movement to blocks POC
-
 ```
                    /~@@~\,
  _______ . _\_\___/\ __ /\___|_|_ . _______
