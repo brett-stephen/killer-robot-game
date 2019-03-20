@@ -10,6 +10,7 @@
 
 int y_rotate = 0;
 int x_rotate = 0;
+int antenna_rotation = 0;
 
 void set_color_red() {glColor3f(1.0, 0.0, 0.0);}
 
@@ -87,12 +88,20 @@ void draw_antenna()
 {
   glPushMatrix();
     set_color_black();
+    glRotatef(antenna_rotation, 0.0, 1.0, 0.0);
     glTranslatef(0.0, 0.65, 0.0);
     glRotatef(90, 1.0, 0.0, 0.0);
     GLUquadricObj *quadratic;
     quadratic = gluNewQuadric();
     gluCylinder(quadratic, 0.1, 0.1, 0.4, 32, 32);
+    glPushMatrix();
+    set_color_green();
+    glRotatef(90.0, 1.0, 0.0, 0.0);
+    glutSolidCone(0.2, 0.5, 10, 10);
+    glPopMatrix();
+    set_color_black();
     set_color_default();
+    antenna_rotation += 30;
   glPopMatrix();
 }
 
