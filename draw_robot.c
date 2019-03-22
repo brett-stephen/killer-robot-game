@@ -87,8 +87,10 @@ void draw_neck()
 void draw_antenna()
 {
   glPushMatrix();
-    set_color_black();
+    set_color_red();
+    // Spin the antenna 30 deg every frame
     glRotatef(antenna_rotation, 0.0, 1.0, 0.0);
+    // Draw the cylinder
     glTranslatef(0.0, 0.65, 0.0);
     glRotatef(90, 1.0, 0.0, 0.0);
     GLUquadricObj *quadratic;
@@ -96,6 +98,8 @@ void draw_antenna()
     gluCylinder(quadratic, 0.1, 0.1, 0.4, 32, 32);
     glPushMatrix();
     set_color_green();
+    // Draw the rotating cone
+    glTranslatef(0.0, 0.4, 0.0);
     glRotatef(90.0, 1.0, 0.0, 0.0);
     glutSolidCone(0.2, 0.5, 10, 10);
     glPopMatrix();
