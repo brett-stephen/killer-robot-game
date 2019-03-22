@@ -11,19 +11,25 @@
 #include <GL/glu.h>
 
 
-#define MAX_BUILDINGS 15
-#define MAX_BLOCKS 100
+#define MAX_BUILDINGS 6
+#define BLOCKS_ROWS 14
+#define BLOCKS_COLUMNS 14
+#define BLOCKS_SZ 5.0
+#define GAPS_SZ 1.0
 
 static float eyeX =5.0f, eyeY = 5.0f, eyeZ = -1.0f; // for visualization, delete later.
 
+// A struct that represents a building in a city, which has a health, position and color
 struct building
 {
    double x; //X-coor of building relative to block center
    double z; //Z-coor of building relative to block center
+   double color[3];
    double sideLength; //Side length of building
    double height; //Height length of building
 };
 
+// A struct that represents a block in a city which can contain buildings
 struct block
 {
    double x; //X-coor of block relative to world origin
@@ -32,69 +38,78 @@ struct block
    struct building buildings[MAX_BUILDINGS]; // array of buildings on the block
 };
 
-struct block city[MAX_BLOCKS];
+struct block city[BLOCKS_ROWS * BLOCKS_COLUMNS];
 
-// generateBuildings
-// inputs: pointer to the array of buildings.
-// generates the model for the buildings on a block.
-void generateBuildings(arrPtr)
+//returns random double between 0 & 1
+// used for city generation
+double randDouble()
 {
-  int numBuildings = rand()%MAX_BUILDINGS+1; // generates a number between 1 and 15
-
-  int i;
-  for (i = 0; i < numBuildings; i++) {
-    //*(arrPtr+i).x = 1;
-    *(arrPtr+i).x = 1;
-  }
-
- return;
+    return (double)rand() / (double)RAND_MAX ;
 }
 
 // generateCity
-// inputs: number of rows and colums of blocks in city, size length of block, gap size between blocks.
+// inputs: changed within the define section
 // generates the model of the city as an array of blocks that contain an array of buildings.
 // this function is called once during program initialization.
-// callback render function can then render by iterating through city struct.
-void generateCity(int rows, int columns, double blockSz, double gapSz)
+void generateCity()
 {
-  int numBlocks = rows*columns;
 
-  if (numBlocks > MAX_BLOCKS)
-  {
-    return;
-  }
-
-  double xLength = (double)rows * (blockSz+gapSz);
-  double yLength = (double)columns * (blockSz+gapSz);
+  double xLength = (BLOCKS_ROWS * (BLOCKS_SZ+GAPS_SZ))-GAPS_SZ;
+  double yLength = (BLOCKS_COLUMNS * (BLOCKS_SZ+GAPS_SZ))-GAPS_SZ;
 
   double xOffset = -(xLength/2);
   double yOffset = -(yLength/2);
 
-  int i,j;
+  int currentBlock = 0;
 
-  for (i = 0; i < rows; i++)
+  for (int i = 0; i < BLOCKS_ROWS; i++)
   {
-    for (j = 0; j < columns; j++)
+    for (int j = 0; j < BLOCKS_COLUMNS; j++)
     {
-      city[(i+1)*j].x = xOffset + ((blockSz+gapSz)*i);
-      city[(i+1)*j].z = yOffset + ((blockSz+gapSz)*j);
-      city[(i+1)*j].sideLength = blockSz;
-      struct building *ptr = city[(i+1)*j].buildings;
-      generateBuildings(ptr);
-      //city[(i+1)*j].buildings[] = };
-      /* {.x = xOffset + ((blockSz+gapSz)*i),
-          .z = zOffset + ((blockSz+gapSz)*j),
-          .sideLength = blockSz}; */
+      city[currentBlock].x = xOffset + ((BLOCKS_SZ+GAPS_SZ)*i);
+      city[currentBlock].z = yOffset + ((BLOCKS_SZ+GAPS_SZ)*j);
+      city[currentBlock].sideLength = BLOCKS_SZ;
+
+      currentBlock++;
+
+      for (size_t k = 0; k < MAX_BUILDINGS; k++) {
+        city[currentBlock].buildings[k].sideLength = BLOCKS_SZ * (randDouble()*0.1+0.1); // The max sideleng is half the sideleng of the block
+        city[currentBlock].buildings[k].x = -(BLOCKS_SZ*0.5)+(BLOCKS_SZ*randDouble());//BLOCKS_SZ*0.5;
+        city[currentBlock].buildings[k].z = -(BLOCKS_SZ*0.5)+(BLOCKS_SZ*randDouble());//BLOCKS_SZ*0.5;
+        city[currentBlock].buildings[k].height = (randDouble()*5);
+        city[currentBlock].buildings[k].color[0] = (randDouble()*0.5);
+        city[currentBlock].buildings[k].color[1] = (randDouble()*0.5);
+        city[currentBlock].buildings[k].color[2] = (randDouble()*0.5);
+      }
     }
   }
 
   return;
 }
 
-/*
-Everything under here is old code - to be refactored.
-*/
 
+// dumpCity
+// prints out city model for debugging
+void dumpCity()
+{
+  for (int i = 0; i < (BLOCKS_ROWS * BLOCKS_COLUMNS); i++)
+  {
+    int currentBlock = i;
+    printf("Block Data: %i x: %f z: %f sl: %f \n", currentBlock, city[currentBlock].x, city[currentBlock].z, city[currentBlock].sideLength);
+
+    for (int k = 0; k < MAX_BUILDINGS; k++) {
+      printf("Building Data: %d x: %f z: %f sl: %f h: %f \n", k,
+      city[currentBlock].buildings[k].x,
+      city[currentBlock].buildings[k].z,
+      city[currentBlock].buildings[k].sideLength,
+      city[currentBlock].buildings[k].height);
+    }
+  }
+    return;
+}
+
+// drawBuilding
+// draws a building
 void drawBuilding(double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3)
 {
     double xhalfside = xlength / 2;
@@ -138,30 +153,23 @@ void drawBuilding(double x1, double z1, double xlength, double hlength, double z
    glVertex3f(-xhalfside, hlength,  zhalfside);
    glVertex3f(-xhalfside, hlength, -zhalfside);
 
+   // Top Face; offset.  Yellow, varying levels of opaque.
+   glNormal3f(0.0f, 1.0f, 0.0f);
+
+   glVertex3f(xhalfside, hlength, zhalfside);
+   glVertex3f(xhalfside, hlength,  -zhalfside);
+   glVertex3f(-xhalfside, hlength, -zhalfside);
+   glVertex3f(-xhalfside, hlength, zhalfside);
+
    // All polygons have been drawn.
    glEnd();
 }
 
-void drawBlock(double x1, double y1, double z1, double sidelength,double c1,double c2,double c3)
+// drawBlock
+// draws a block
+void drawBlock(double c1,double c2,double c3)
 {
-    double halfside = sidelength / 2;
-
-    glColor3d(c1,c2,c3);
-    glBegin(GL_POLYGON);
-
-    glVertex3d(x1 + halfside, y1 , z1 + halfside);
-    glVertex3d(x1 + halfside, y1 , z1 - halfside);
-    glVertex3d(x1 - halfside, y1 , z1 - halfside);
-    glVertex3d(x1 - halfside, y1 , z1 + halfside);
-
-    glEnd();
-
-    //drawBuilding(1,1, 0.5, 3, 0.5, 0.4,0.4,0.5);
-}
-
-void drawBlock2(double sidelength,double c1,double c2,double c3)
-{
-    double halfside = sidelength / 2;
+    double halfside = BLOCKS_SZ / 2;
 
     glColor3d(c1,c2,c3);
     glBegin(GL_POLYGON);
@@ -172,40 +180,34 @@ void drawBlock2(double sidelength,double c1,double c2,double c3)
     glVertex3d(-halfside, 0 , halfside);
 
     glEnd();
-
-    int numbBuildings = rand()%15+3;
-    unsigned int i;
-    for (i = 0; i < numbBuildings; i++) {
-      double x = (rand()%100)/100;
-      double y = (rand()%100)/100;
-      int h = rand()%3;
-      //double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3
-      drawBuilding(x,y, 0.5, h, 0.5, 0.4,0.4,0.5);
-    }
 }
 
-void generateBlocks(int numColumns, int numRows, double sideLength, double gapLength)
+// renderCity
+// renders the model of the city that is generated from initialization.
+void renderCity()
 {
-  double xLength = (double)numColumns * (sideLength+gapLength);
-  double yLength = (double)numRows * (sideLength+gapLength);
-
-  double xOffset = -(xLength/2);
-  double yOffset = -(yLength/2);
-
-  //printf("%f %f \n",xLength,yLength);
-
-  int i,j=0;
-
-  for (i = 0; i < numColumns; i++)
+  for (int currentBlock = 0; currentBlock < (BLOCKS_ROWS*BLOCKS_COLUMNS); currentBlock++)
   {
-    for (j = 0; j < numRows; j++)
-    {
       glPushMatrix();
-      //glTranslatef(i,0,j);
-      glTranslatef(xOffset + ((sideLength+gapLength)*i),0, yOffset + ((sideLength+gapLength)*j) );
-      drawBlock2(1,0.0,1.0,0.0);
+      glTranslatef(city[currentBlock].x,0,city[currentBlock].z); //translates block
+      drawBlock(0.4,0.4,0.4); //draws block
+
+
+      for (int i = 0; i < MAX_BUILDINGS; i++) {
+        glPushMatrix();
+        //double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3)
+        drawBuilding(city[currentBlock].buildings[i].x,
+        city[currentBlock].buildings[i].z,
+        city[currentBlock].buildings[i].sideLength,
+        city[currentBlock].buildings[i].height,
+        city[currentBlock].buildings[i].sideLength,
+        city[currentBlock].buildings[i].color[0],
+        city[currentBlock].buildings[i].color[1],
+        city[currentBlock].buildings[i].color[2]);
+        glPopMatrix();
+      }
+
       glPopMatrix();
-    }
   }
 }
 
@@ -228,12 +230,24 @@ void display(void)
              0.0, 0.0, 0.0,   /* Look at */
              0.0, 1.0, 0.0);  /* Up vector */
 
-  generateBlocks(6,6,1,1);
+  // The Main function that renders blocks & buildings
+  renderCity();
 
-  drawBlock(0,-0.05,0,100,0.5,0.5,0.5);
-
-//Z AXIS VISUALIZATION
+  //Render Ground
   glPushMatrix();
+  glColor3d(0.2,0.2,0.2);
+  glBegin(GL_POLYGON);
+  glVertex3f(100.0, -0.05 , 100.0);
+  glVertex3f(100.0, -0.05 , -100.0);
+  glVertex3f(-100.0, -0.05 , -100.0);
+  glVertex3f(-100.0, -0.05 , 100.0);
+  glEnd();
+
+  glPopMatrix();
+
+  //AXIS VISUALIZATION
+  glPushMatrix();
+
     glBegin(GL_LINES);
 
     glLineWidth(1);
@@ -258,6 +272,11 @@ void display(void)
 
 void init (void)
 {
+  //generaets model of the city
+  generateCity();
+  //dumps generate city data into terminal / for deubbing purposes only.
+  dumpCity();
+
    /* select clearing color 	*/
    glClearColor (0.3, 0.53, 0.92, 0.0);
    glShadeModel(GL_FLAT);
@@ -328,7 +347,7 @@ int main(int argc, char** argv)
 
 
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize(500, 500);
+   glutInitWindowSize(1000, 800);
    glutInitWindowPosition (100, 100);
    glutCreateWindow (argv[0]);
    init();
