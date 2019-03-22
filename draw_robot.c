@@ -10,23 +10,7 @@
 
 int y_rotate = 0;
 int x_rotate = 0;
-
-
-// void cb_keyboard(unsigned char key, int x, int y)
-// {
-//   switch(key)
-//   {
-//     case 32:
-//       y_rotate += 15;
-//       break;
-//     case 97:
-//       x_rotate += 15;
-//       break;
-//     default:
-//       printf ("KP: No action for %d.\n", key);
-//       break;
-//   }
-// }
+int antenna_rotation = 0;
 
 void set_color_red() {glColor3f(1.0, 0.0, 0.0);}
 
@@ -103,13 +87,25 @@ void draw_neck()
 void draw_antenna()
 {
   glPushMatrix();
-    set_color_black();
+    set_color_red();
+    // Spin the antenna 30 deg every frame
+    glRotatef(antenna_rotation, 0.0, 1.0, 0.0);
+    // Draw the cylinder
     glTranslatef(0.0, 0.65, 0.0);
     glRotatef(90, 1.0, 0.0, 0.0);
     GLUquadricObj *quadratic;
     quadratic = gluNewQuadric();
     gluCylinder(quadratic, 0.1, 0.1, 0.4, 32, 32);
+    glPushMatrix();
+    set_color_green();
+    // Draw the rotating cone
+    glTranslatef(0.0, 0.4, 0.0);
+    glRotatef(90.0, 1.0, 0.0, 0.0);
+    glutSolidCone(0.2, 0.5, 10, 10);
+    glPopMatrix();
+    set_color_black();
     set_color_default();
+    antenna_rotation += 30;
   glPopMatrix();
 }
 
@@ -157,44 +153,3 @@ void draw_robot(void)
   draw_neck();
   draw_head();
 }
-
-// void display(void)
-// {
-//   glClearColor(1.0, 1.0, 1.0, 0.0);
-//   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//   gluLookAt(0.1,0.1,0.5,0.0,0.0,0.0,0.0,1.0,0.0);
-//     // Start drawing the robot
-//   set_color_default();
-//   glMatrixMode(GL_MODELVIEW);
-//   glLoadIdentity();
-//   // Press space to rotate object
-//   // TODO: Remove this so no import conflict
-//   glRotatef(y_rotate, 0.0, 1.0, 0.0);
-//   glRotatef(x_rotate, 1.0, 0.0, 0.0);
-//   draw_robot();
-//   glutSwapBuffers();
-// }
-
-// void init (void)
-// {
-//    glClearColor (0.0, 0.0, 0.0, 0.0);
-//    glMatrixMode (GL_PROJECTION);
-//    glEnable(GL_DEPTH_TEST);
-//  	 glLoadIdentity ();
-//  	 glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 5.0);
-// }
-
-// int main(int argc, char** argv)
-// {
-//    glutInit(&argc, argv);
-//    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-//    glutInitWindowSize (250, 250);
-//    glutInitWindowPosition (100, 100);
-//    glutCreateWindow ("draw robot");
-//    glutKeyboardFunc(&cb_keyboard);
-//    init ();
-//    glutDisplayFunc(display);
-//    glutIdleFunc(display);
-//    glutMainLoop();
-//    return 0;
-// }

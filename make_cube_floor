@@ -8,5 +8,5 @@ LIBRARIES = -lX11 -lXi -lXmu -lglut -lGL -lGLU -lm
 
 All: cube_floor 
 
-cube_floor: cube_floor.o
+cube_floor: cube_floor.o draw_robot.c
 	$(CC) $(CFLAGS) draw_robot.c -o $@ $(LIBDIR) $< $(LIBRARIES)
