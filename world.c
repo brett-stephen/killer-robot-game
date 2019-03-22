@@ -34,6 +34,22 @@ struct block
 
 struct block city[MAX_BLOCKS];
 
+// generateBuildings
+// inputs: pointer to the array of buildings.
+// generates the model for the buildings on a block.
+void generateBuildings(arrPtr)
+{
+  int numBuildings = rand()%MAX_BUILDINGS+1; // generates a number between 1 and 15
+
+  int i;
+  for (i = 0; i < numBuildings; i++) {
+    //*(arrPtr+i).x = 1;
+    *(arrPtr+i).x = 1;
+  }
+
+ return;
+}
+
 // generateCity
 // inputs: number of rows and colums of blocks in city, size length of block, gap size between blocks.
 // generates the model of the city as an array of blocks that contain an array of buildings.
@@ -63,6 +79,8 @@ void generateCity(int rows, int columns, double blockSz, double gapSz)
       city[(i+1)*j].x = xOffset + ((blockSz+gapSz)*i);
       city[(i+1)*j].z = yOffset + ((blockSz+gapSz)*j);
       city[(i+1)*j].sideLength = blockSz;
+      struct building *ptr = city[(i+1)*j].buildings;
+      generateBuildings(ptr);
       //city[(i+1)*j].buildings[] = };
       /* {.x = xOffset + ((blockSz+gapSz)*i),
           .z = zOffset + ((blockSz+gapSz)*j),
