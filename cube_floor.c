@@ -41,6 +41,29 @@ void display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(0.0, 2.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+    // Draw the vertical lines
+    glPushMatrix();
+    glColor3f(0.0, 1.0, 0.0);
+    for (int i = -10; i < 10; i+=2) {
+        glBegin(GL_LINES); 
+        glVertex3f((GLfloat)i, 0.0, -100.0);
+        glVertex3f((GLfloat)i, 0.0, 100.0);
+        glEnd();
+    }
+    glPopMatrix();
+
+    // Draw the horizontal lines
+    glPushMatrix();
+    glColor3f(0.0, 1.0, 0.0);
+    for (int i = -10; i < 10; i+=2) {
+        glBegin(GL_LINES); 
+        glVertex3f(-100.0, 0.0, (GLfloat)i);
+        glVertex3f(100.0, 0.0, (GLfloat)i);
+        glEnd();
+    }
+    glPopMatrix();
+
     glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
     switch (FACING_STATE)
     {
@@ -61,6 +84,7 @@ void display(void)
     }
     // glutWireTeapot(2);
     draw_robot();
+
     glutSwapBuffers();
 }
 
@@ -131,10 +155,19 @@ void keyboard(unsigned char key, int x, int y)
             Z_POS += 1;
         }
         break;
+    case 112: // f1
+        ROBOT_HEAD_DIRECTION = LEFT;
     default:
         break;
     }
     printf("X_POS %d Y_POS %d Z_POS %d\n", X_POS, Y_POS, Z_POS);
+}
+
+void special_keyboard_callback(int key, int x, int y) {
+    switch(key) {
+        default:
+            break;
+    } 
 }
 
 int main(int argc, char **argv)
@@ -151,6 +184,7 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutIdleFunc(display);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special_keyboard_callback);
     glutMainLoop();
     return 0;
 }

@@ -7,12 +7,6 @@
 
 #include "draw_robot.h"
 
-enum ROBOT_LOOK
-{
-  LEFT,
-  RIGHT,
-  FORWARD
-};
 int ROBOT_HEAD_DIRECTION = FORWARD;
 
 int ROBOT_ANTENNA_ANGLE = 0;
@@ -179,6 +173,7 @@ void robot_keyboard_callback(unsigned char key, int x, int y)
       ROBOT_HEAD_DIRECTION = FORWARD;
       // TODO: also change the lookAt for the robot
       break;
-    case 
+    default: 
+      break;
   }
 }
