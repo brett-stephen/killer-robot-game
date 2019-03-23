@@ -1,6 +1,6 @@
-#include <GL/glut.h>
 #include <stdlib.h>
-
+#include <stdio.h>
+#include <GL/glut.h>
 
 struct building
 {
@@ -13,107 +13,129 @@ struct building
 
 struct building build={3,-10,-10,25,25};
 
-
-/*struct building generateB()
-{
-      struct building test;
-      test.health = 2;
-      test.x=-10;
-      test.z=25;
-      test.sideLength =25;
-      test.height = -10;
-
-      return test;
-      }*/
-   
-//struct building build = generateB();
-
-void display(void)
-{
-   glClear(GL_COLOR_BUFFER_BIT);
-   glPushMatrix();
-   glColor3f(1.0, 1.0, 1.0);
-   glRectf(-25.0, -25.0, 25.0, 25.0);
-   glPopMatrix();
-   glutSwapBuffers();
-}
-
-void damageA(void)
-{
-   glClear(GL_COLOR_BUFFER_BIT);
-   glPushMatrix();
-   glColor3f(0.8, 1.0, 1.0);
-   glRectf(-5.0, -5.0, 5.0, 5.0);
-   glPopMatrix();
-
-   glutSwapBuffers();
-
-}
-
-void damageB(void)
-{
-   glClear(GL_COLOR_BUFFER_BIT);
-   glPushMatrix();
-   glColor3f(0.8, 0.2, 1.0);
-   glRectf(-1, -1.0, 1.0, 1.0);
-   glPopMatrix();
-
-   glutSwapBuffers();
-
-}
-
-/*void displayB(building)
-{
-   build = generateB();
-   }*/
-
-void init(void) 
+void init()
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
-   glShadeModel (GL_FLAT);
 }
+
+void drawObjects(GLenum mode)
+{
+
+   if(mode == GL_SELECT)
+      glLoadName(1);
+
+   if (build.health ==3){
+      glColor3f(1.0, 0.0, 0.0);
+      glRectf(-10, -10, 10.0, 10.0);
+      printf("health = %d\n", build.health);
+   }
+   if (build.health ==2){
+      glColor3f(1.0, 0.0, 0.0);
+      glRectf(-5, -5, 5.0, 5.0);
+      printf("health = %d\n", build.health);
+   }
+   if (build.health ==1){
+      glColor3f(1.0, 0.0, 0.0);
+      glRectf(-1.0, -1.0, 1, 1);
+      printf("health = %d\n", build.health);
+   }
+
+}
+
+
+void display()
+{
+   glClear(GL_COLOR_BUFFER_BIT);
+   drawObjects(GL_RENDER);
+   glFlush();
+}
+
+/*  processHits prints out the contents of the
+ *  selection array.
+ */
+void processHits (GLint hits, GLuint buffer[])
+{
+   unsigned int i, j;
+   GLint names, *ptr;
+
+   printf ("hits = %d\n", hits);
+   ptr = (GLint *) buffer;
+   for (i = 0; i < hits; i++) {	/*  for each hit*/
+      names = *ptr;
+      ptr+=3;
+      for (j = 0; j < names; j++) { /*  for each name*/
+         if(*ptr==1) printf ("red rectangle\n");
+         else printf ("blue rectangle\n");
+         ptr++;
+      }
+      printf ("\n");
+   }
+
+}
+
+#define SIZE 512
+
+void mouse(int button, int state, int x, int y)
+{
+   GLuint selectBuf[SIZE];
+   GLint hits;
+   GLint viewport[4];
+
+   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+   {
+      glGetIntegerv (GL_VIEWPORT, viewport);
+
+      glSelectBuffer (SIZE, selectBuf);
+      glRenderMode(GL_SELECT);
+
+      glInitNames();
+      glPushName(0);
+
+      glMatrixMode (GL_PROJECTION);
+      glPushMatrix ();
+      glLoadIdentity ();
+      /*  create 5x5 pixel picking region near cursor location	*/
+      gluPickMatrix ((GLdouble) x, (GLdouble) (viewport[3] - y),
+                     0.5, 0.5, viewport);
+      gluOrtho2D (-20.0, 20.0, -20.0, 20.0);
+      drawObjects(GL_SELECT);
+
+
+      glMatrixMode (GL_PROJECTION);
+      glPopMatrix ();
+      glFlush ();
+
+      hits = glRenderMode (GL_RENDER);
+      build.health = build.health - hits;
+      processHits (hits, selectBuf);
+
+      glutPostRedisplay();
+   }
+}
+
 
 void reshape(int w, int h)
 {
-   glViewport (0, 0, (GLsizei) w, (GLsizei) h);
+   glViewport(0, 0, w, h);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
+   gluOrtho2D (-20.0, 20.0, -20.0, 20.0);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 }
 
-void mouse(int button, int state, int x, int y) 
-{
-   switch (button) {
-      case GLUT_LEFT_BUTTON:
-         if (state == GLUT_DOWN)
-	    build.health = build.health -1; 
-	    if(build.health == 2)
-	       glutIdleFunc(damageA);
-	    else
-	       glutIdleFunc(damageB);
-         break;
-      default:
-         break;
-   }
-}
-   
-/* 
- *  Request double buffer display mode.
- *  Register mouse input callback functions
- */
+/* Main Loop */
 int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
-   glutInitWindowSize (250, 250); 
+   glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+   glutInitWindowSize (500, 500);
    glutInitWindowPosition (100, 100);
    glutCreateWindow (argv[0]);
    init ();
-   glutDisplayFunc(display); 
-   glutReshapeFunc(reshape); 
-   glutMouseFunc(mouse);
+   glutReshapeFunc (reshape);
+   glutDisplayFunc(display);
+   glutMouseFunc (mouse);
    glutMainLoop();
-   return 0;   /* We never return. */
+   return 0;
 }
