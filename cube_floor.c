@@ -35,18 +35,50 @@ enum facing
 };
 int FACING_STATE = FACE_FORWARD;
 
+int *get_camera_offset()
+{
+    static int xyz[3];
+
+    xyz[1] = Y_POS + 2;
+
+    switch (FACING_STATE)
+    {
+    case FACE_FORWARD:
+        xyz[0] = X_POS;
+        xyz[2] = Z_POS - 5;
+        break;
+    case FACE_BACK:
+        xyz[0] = X_POS;
+        xyz[2] = Z_POS + 5;
+        break;
+    case FACE_RIGHT: 
+        xyz[0] = X_POS + 5; 
+        xyz[2] = Z_POS;
+        break;
+    case FACE_LEFT: 
+        xyz[0] = X_POS - 5;
+        xyz[2] = Z_POS;
+    default:
+        break;
+    }
+    return xyz;
+}
+
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0.0, 2.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+    int *p = get_camera_offset();
+    gluLookAt(p[0], p[1], p[2], X_POS, Y_POS, Z_POS, 0.0, 1.0, 0.0);
 
     // Draw the vertical lines
     glPushMatrix();
     glColor3f(0.0, 1.0, 0.0);
-    for (int i = -10; i < 10; i+=2) {
-        glBegin(GL_LINES); 
+    for (int i = -2; i < 5; i += 2)
+    {
+        glBegin(GL_LINES);
         glVertex3f((GLfloat)i, 0.0, -100.0);
         glVertex3f((GLfloat)i, 0.0, 100.0);
         glEnd();
@@ -55,9 +87,10 @@ void display(void)
 
     // Draw the horizontal lines
     glPushMatrix();
-    glColor3f(0.0, 1.0, 0.0);
-    for (int i = -10; i < 10; i+=2) {
-        glBegin(GL_LINES); 
+    glColor3f(0.0, 0.0, 1.0);
+    for (int i = -2; i < 5; i += 2)
+    {
+        glBegin(GL_LINES);
         glVertex3f(-100.0, 0.0, (GLfloat)i);
         glVertex3f(100.0, 0.0, (GLfloat)i);
         glEnd();
@@ -126,48 +159,78 @@ void keyboard(unsigned char key, int x, int y)
     case 97: // a
         if (can_move_x())
         {
-            printf("Moving left\n");
+            printf("Facing left\n");
             FACING_STATE = FACE_LEFT;
-            X_POS += 1;
         }
         break;
     case 115: // s
-        if (can_move_z())
+        switch(FACING_STATE) 
         {
-            printf("Moving back\n");
-            FACING_STATE = FACE_BACK;
-            Z_POS -= 1;
+            case FACE_BACK: 
+                FACING_STATE = FACE_FORWARD; 
+                break;
+            case FACE_FORWARD: 
+                FACING_STATE = FACE_BACK;
+                break;
+            case FACE_RIGHT: 
+                FACING_STATE = FACE_LEFT;
+                break;
+            case FACE_LEFT: 
+                FACING_STATE = FACE_RIGHT;
+                break;
         }
         break;
     case 100: // d
         if (can_move_x())
         {
-            printf("Moving right\n");
+            printf("Facing R/L directions\n");
             FACING_STATE = FACE_RIGHT;
-            X_POS -= 1;
         }
         break;
     case 119: // w
+        if (can_move_x()) 
+        {
+            switch(FACING_STATE) 
+            {
+                case FACE_RIGHT: 
+                    X_POS -= 1; 
+                    break;
+                case FACE_LEFT: 
+                    X_POS += 1;
+                    break;
+                default: 
+                    break;
+            }
+        }
         if (can_move_z())
         {
-            FACING_STATE = FACE_FORWARD;
             printf("Moving forward\n");
-            Z_POS += 1;
+            switch(FACING_STATE) 
+            {
+                case FACE_BACK: 
+                    Z_POS -= 1; 
+                    break;
+                case FACE_FORWARD: 
+                    Z_POS += 1;
+                    break;
+                default: 
+                    break;
+            }
         }
         break;
-    case 112: // f1
-        ROBOT_HEAD_DIRECTION = LEFT;
     default:
         break;
     }
     printf("X_POS %d Y_POS %d Z_POS %d\n", X_POS, Y_POS, Z_POS);
 }
 
-void special_keyboard_callback(int key, int x, int y) {
-    switch(key) {
-        default:
-            break;
-    } 
+void special_keyboard_callback(int key, int x, int y)
+{
+    switch (key)
+    {
+    default:
+        break;
+    }
 }
 
 int main(int argc, char **argv)
