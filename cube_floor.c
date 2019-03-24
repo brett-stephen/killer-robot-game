@@ -1,12 +1,13 @@
 /*
-Move a cube around with WASD
+Move a robot around with WASD. 
 
-The robot is only allowed to along a 2 way street,
-unless it is at an intersection, which are evenly
-spaced every `BLOCK_LENGTH` units, where it may
-go FORWARD, BACK, RIGHT, or LEFT.
+The robot can only move along the street (line) it 
+is on. It can always turn around and can turn right or 
+left it is at an intersection (in place), otherwise, 
+nothing happens. 
 
-The cube should face the direction it is pointing.
+Also, the follows the robot, by default from an elevated
+position directly behind - looking at its position. 
 
 Ex. Intersections every 2 units
   |  |  |  |  |
@@ -34,35 +35,6 @@ enum facing
     FACE_LEFT
 };
 int FACING_STATE = FACE_FORWARD;
-
-int *get_camera_offset()
-{
-    static int xyz[3];
-
-    xyz[1] = Y_POS + 2;
-
-    switch (FACING_STATE)
-    {
-    case FACE_FORWARD:
-        xyz[0] = X_POS;
-        xyz[2] = Z_POS - 5;
-        break;
-    case FACE_BACK:
-        xyz[0] = X_POS;
-        xyz[2] = Z_POS + 5;
-        break;
-    case FACE_RIGHT: 
-        xyz[0] = X_POS + 5; 
-        xyz[2] = Z_POS;
-        break;
-    case FACE_LEFT: 
-        xyz[0] = X_POS - 5;
-        xyz[2] = Z_POS;
-    default:
-        break;
-    }
-    return xyz;
-}
 
 void display(void)
 {
@@ -98,7 +70,9 @@ void display(void)
     glPopMatrix();
 
     glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
+
     switch (FACING_STATE)
+    // Rotate the robot according to the direction it is facing. 
     {
     case FACE_FORWARD:
         glRotatef(0.0, 0.0, 1.0, 0.0);
@@ -115,7 +89,7 @@ void display(void)
     default:
         break;
     }
-    // glutWireTeapot(2);
+
     draw_robot();
 
     glutSwapBuffers();
@@ -138,99 +112,172 @@ void reshape(int w, int h)
     glLoadIdentity();
 }
 
+int *get_camera_offset()
+{
+    // Return the offset (array of x, y, z) from the
+    // robot center to the camera 'eye' coordinates. 
+    static int xyz[3];
+
+    xyz[1] = Y_POS + 2;
+
+    switch (FACING_STATE)
+    {
+    case FACE_FORWARD:
+        xyz[0] = X_POS;
+        xyz[2] = Z_POS - 5;
+        break;
+    case FACE_BACK:
+        xyz[0] = X_POS;
+        xyz[2] = Z_POS + 5;
+        break;
+    case FACE_RIGHT: 
+        xyz[0] = X_POS + 5; 
+        xyz[2] = Z_POS;
+        break;
+    case FACE_LEFT: 
+        xyz[0] = X_POS - 5;
+        xyz[2] = Z_POS;
+    default:
+        break;
+    }
+    return xyz;
+}
+
 int can_move_x()
 {
-    // The cube can move left or right
-    // if is on a horizontal street.
+    // Assert that the robot is on a horizontal street.
     return !(Z_POS % BLOCK_LENGTH);
 }
 
 int can_move_z()
 {
-    // The cube can move foward or back
-    // if it is on a vertical street.
+    // Assert that the robot is on a vertical street. 
     return !(X_POS % BLOCK_LENGTH);
+}
+
+void turn_right_if_possible() 
+{
+    // If we are at an intersection, turn the robot right.
+    if (can_move_x() && can_move_z()) 
+    {
+        switch(FACING_STATE) 
+        {
+            case FACE_FORWARD: 
+                FACING_STATE = FACE_RIGHT;
+                break;
+            case FACE_BACK: 
+                FACING_STATE = FACE_LEFT;
+                break;
+            case FACE_RIGHT: 
+                FACING_STATE = FACE_BACK;
+                break;
+            case FACE_LEFT: 
+                FACING_STATE = FACE_FORWARD;
+                break;
+        }
+    }   
+}
+
+void turn_left_if_possible() 
+{
+    // If we are at an intersection, turn the robot left.
+    if (can_move_x() && can_move_z()) 
+    {
+        switch(FACING_STATE) 
+        {
+        case FACE_BACK: 
+            FACING_STATE = FACE_RIGHT;
+            break;
+        case FACE_FORWARD: 
+            FACING_STATE = FACE_LEFT;
+            break;
+        case FACE_RIGHT: 
+            FACING_STATE = FACE_FORWARD;
+            break;
+        case FACE_LEFT: 
+            FACING_STATE = FACE_BACK;
+            break;
+        }
+    }
+}
+
+void turn_around() 
+{
+    // Turn the robot in the opposite direction it is facing.
+    switch(FACING_STATE) 
+    {
+        case FACE_BACK: 
+            FACING_STATE = FACE_FORWARD; 
+            break;
+        case FACE_FORWARD: 
+            FACING_STATE = FACE_BACK;
+            break;
+        case FACE_RIGHT: 
+            FACING_STATE = FACE_LEFT;
+            break;
+        case FACE_LEFT: 
+            FACING_STATE = FACE_RIGHT;
+            break;
+    }
+}
+
+void move_forward() 
+{
+    // Move the robot forward in the direction it is facing.
+    if (can_move_x()) 
+    {
+        // Move right or left.
+        switch(FACING_STATE) 
+        {
+            case FACE_RIGHT: 
+                X_POS -= 1; 
+                break;
+            case FACE_LEFT: 
+                X_POS += 1;
+                break;
+            default: 
+                break;
+        }
+    }
+    if (can_move_z())
+    {
+        // Move up or down.
+        switch(FACING_STATE) 
+        {
+            case FACE_BACK: 
+                Z_POS -= 1; 
+                break;
+            case FACE_FORWARD: 
+                Z_POS += 1;
+                break;
+            default: 
+                break;
+        }
+    }
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
-    case 97: // a
-        if (can_move_x())
-        {
-            printf("Facing left\n");
-            FACING_STATE = FACE_LEFT;
-        }
+    case 119: // "w"
+        move_forward();
         break;
-    case 115: // s
-        switch(FACING_STATE) 
-        {
-            case FACE_BACK: 
-                FACING_STATE = FACE_FORWARD; 
-                break;
-            case FACE_FORWARD: 
-                FACING_STATE = FACE_BACK;
-                break;
-            case FACE_RIGHT: 
-                FACING_STATE = FACE_LEFT;
-                break;
-            case FACE_LEFT: 
-                FACING_STATE = FACE_RIGHT;
-                break;
-        }
+    case 97: // "a"
+        turn_left_if_possible();
         break;
-    case 100: // d
-        if (can_move_x())
-        {
-            printf("Facing R/L directions\n");
-            FACING_STATE = FACE_RIGHT;
-        }
+    case 100: // "d"
+        turn_right_if_possible();
         break;
-    case 119: // w
-        if (can_move_x()) 
-        {
-            switch(FACING_STATE) 
-            {
-                case FACE_RIGHT: 
-                    X_POS -= 1; 
-                    break;
-                case FACE_LEFT: 
-                    X_POS += 1;
-                    break;
-                default: 
-                    break;
-            }
-        }
-        if (can_move_z())
-        {
-            printf("Moving forward\n");
-            switch(FACING_STATE) 
-            {
-                case FACE_BACK: 
-                    Z_POS -= 1; 
-                    break;
-                case FACE_FORWARD: 
-                    Z_POS += 1;
-                    break;
-                default: 
-                    break;
-            }
-        }
+    case 115: // "s"
+        turn_around();
         break;
     default:
+        printf("Not a movement key: %d\n", key);
+        fflush(stdout);
         break;
     }
     printf("X_POS %d Y_POS %d Z_POS %d\n", X_POS, Y_POS, Z_POS);
-}
-
-void special_keyboard_callback(int key, int x, int y)
-{
-    switch (key)
-    {
-    default:
-        break;
-    }
 }
 
 int main(int argc, char **argv)
@@ -247,7 +294,6 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutIdleFunc(display);
     glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special_keyboard_callback);
     glutMainLoop();
     return 0;
 }
