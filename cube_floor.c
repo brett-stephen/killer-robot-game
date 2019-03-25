@@ -34,7 +34,24 @@ enum facing
     FACE_BACK,
     FACE_LEFT
 };
+
 int FACING_STATE = FACE_FORWARD;
+
+enum alert_camera_views
+{
+	// Each of these descriptions are 
+	// relative to the  robots center.
+	FRONT_LEFT, // "F8"
+	FRONT_RIGHT, // "F7"
+	BACK_LEFT, // "F5"
+	BACK_RIGHT, // "F6"
+	FRONT_LEFT_FAR, // "F9"
+	FRONT_RIGHT_FAR, // "F10"
+	BACK_LEFT_FAR, // "F11"
+	BACK_RIGHT_FAR, // "F12"
+	DEFAULT // "No function key pressed"
+};
+int ALT_CAMERA_STATE = DEFAULT;
 
 void display(void)
 {
@@ -280,6 +297,67 @@ void keyboard(unsigned char key, int x, int y)
     printf("X_POS %d Y_POS %d Z_POS %d\n", X_POS, Y_POS, Z_POS);
 }
 
+void special_keyboard_up(int key, int x, int y)
+{
+	switch(key)
+	{
+		case 5: // "F5"
+		case 6: // "F6"
+		case 7: // "F7"
+		case 8: // "F8"
+		case 9: // "F9"
+		case 10: // "F10"
+		case 11: // "F11"
+		case 12: // "F12"
+			ALT_CAMERA_STATE = DEFAULT;
+			printf("Alt camera state: default\n");
+			fflush(stdout);
+			break;
+		default: 
+			printf("Not a special control key up: %d\n", key);
+			fflush(stdout);
+			break;
+	}
+}
+
+void special_keyboard(int key, int x, int y)
+{
+	switch(key)
+	{
+		case 5: // "F5"
+			ALT_CAMERA_STATE = BACK_LEFT;
+			printf("Camera state: Back left\n");
+			fflush(stdout);
+			break;
+		case 6: // "F6"
+			ALT_CAMERA_STATE = BACK_RIGHT;
+			break;
+		case 7: // "F7"
+			ALT_CAMERA_STATE = FRONT_RIGHT;
+			break;
+		case 8: // "F8"
+			ALT_CAMERA_STATE = FRONT_LEFT;
+			break;
+		case 9: // "F9"
+			ALT_CAMERA_STATE = BACK_LEFT_FAR;
+			break;
+		case 10: // "F10"
+			ALT_CAMERA_STATE = BACK_RIGHT_FAR;
+			break;
+		case 11: // "F11"
+			ALT_CAMERA_STATE = FRONT_RIGHT_FAR;
+			break;
+		case 12: // "F12"
+			ALT_CAMERA_STATE = FRONT_LEFT_FAR;
+			break;
+		default: 
+			printf("Not a special control key: %d\n", key);
+			fflush(stdout);
+			break;
+		
+	}
+}
+
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
@@ -294,6 +372,10 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutIdleFunc(display);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special_keyboard);
+    glutSpecialUpFunc(special_keyboard_up);
+
     glutMainLoop();
+
     return 0;
 }
