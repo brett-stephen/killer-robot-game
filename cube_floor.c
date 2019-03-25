@@ -157,6 +157,22 @@ int *get_camera_offset()
     default:
         break;
     }
+	// Modify the camera offset such that is takes into account 
+	// the alt camera state controlled by the Function keys.
+	switch (ALT_CAMERA_STATE) 
+	{
+		// TODO: This doesn't work right, it needs to 
+		// know which direction it is facing. 
+		case BACK_LEFT: 
+			xyz[0] = xyz[0] - 5;
+			break;
+		case BACK_RIGHT: 
+			xyz[0] = xyz[0] + 5;
+			break;
+		default: 
+			break;
+	}
+	
     return xyz;
 }
 
@@ -301,22 +317,10 @@ void special_keyboard_up(int key, int x, int y)
 {
 	switch(key)
 	{
-		case 5: // "F5"
-		case 6: // "F6"
-		case 7: // "F7"
-		case 8: // "F8"
-		case 9: // "F9"
-		case 10: // "F10"
-		case 11: // "F11"
-		case 12: // "F12"
-			ALT_CAMERA_STATE = DEFAULT;
-			printf("Alt camera state: default\n");
-			fflush(stdout);
-			break;
-		default: 
-			printf("Not a special control key up: %d\n", key);
-			fflush(stdout);
-			break;
+	default: 
+		printf("Not a special control key up: %d\n", key);
+		fflush(stdout);
+		break;
 	}
 }
 
@@ -324,6 +328,11 @@ void special_keyboard(int key, int x, int y)
 {
 	switch(key)
 	{
+		case 4: // "F4" 
+			ALT_CAMERA_STATE = DEFAULT;
+			printf("Camera state: default\n");
+			fflush(stdout);
+			break;
 		case 5: // "F5"
 			ALT_CAMERA_STATE = BACK_LEFT;
 			printf("Camera state: Back left\n");
@@ -331,24 +340,38 @@ void special_keyboard(int key, int x, int y)
 			break;
 		case 6: // "F6"
 			ALT_CAMERA_STATE = BACK_RIGHT;
+			printf("Camera state: Back right\n");
+			fflush(stdout);
 			break;
 		case 7: // "F7"
 			ALT_CAMERA_STATE = FRONT_RIGHT;
+			printf("Camera state: Front right\n");
+			fflush(stdout);
 			break;
 		case 8: // "F8"
 			ALT_CAMERA_STATE = FRONT_LEFT;
+			printf("Camera state: Front left\n");
+			fflush(stdout);
 			break;
 		case 9: // "F9"
 			ALT_CAMERA_STATE = BACK_LEFT_FAR;
+			printf("Camera state: Back left far\n");
+			fflush(stdout);
 			break;
 		case 10: // "F10"
 			ALT_CAMERA_STATE = BACK_RIGHT_FAR;
+			printf("Camera state: Back right far\n");
+			fflush(stdout);
 			break;
 		case 11: // "F11"
 			ALT_CAMERA_STATE = FRONT_RIGHT_FAR;
+			printf("Camera state: Front right far\n");
+			fflush(stdout);
 			break;
 		case 12: // "F12"
 			ALT_CAMERA_STATE = FRONT_LEFT_FAR;
+			printf("Camera state: Front left far\n");
+			fflush(stdout);
 			break;
 		default: 
 			printf("Not a special control key: %d\n", key);
