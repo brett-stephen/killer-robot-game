@@ -1,3 +1,8 @@
+// Project: Manhattan Massacre
+// University of Lethbridge - CPSC3710
+// Project Deadline: April 1, 2019
+// Gideon Richter, Brett Dziedzic, Michelle Le, Sean Herridge-Berry
+
 #include <stdio.h>
 #include <stdlib.h>
 

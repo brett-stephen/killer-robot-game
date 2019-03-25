@@ -1,3 +1,8 @@
+// Project: Manhattan Massacre
+// University of Lethbridge - CPSC3710
+// Project Deadline: April 1, 2019
+// Gideon Richter, Brett Dziedzic, Michelle Le, Sean Herridge-Berry
+
 /*
 Move a robot around with WASD. 
 
@@ -6,7 +11,7 @@ is on. It can always turn around and can turn right or
 left it is at an intersection (in place), otherwise, 
 nothing happens. 
 
-Also, the follows the robot, by default from an elevated
+Also, the camera follows the robot, by default from an elevated
 position directly behind - looking at its position. 
 
 Ex. Intersections every 2 units
@@ -16,6 +21,7 @@ Ex. Intersections every 2 units
 --|--|--|--|--|--
   |  |  |  |  |
 */
+
 #include <GL/glut.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -129,6 +135,8 @@ void reshape(int w, int h)
     glLoadIdentity();
 }
 
+// Method to calculate the new location of the camera after an F-key has been selected
+//
 int *get_camera_offset()
 {
     // Return the offset (array of x, y, z) from the
@@ -157,7 +165,7 @@ int *get_camera_offset()
     default:
         break;
     }
-	// Modify the camera offset such that is takes into account 
+	// Modify the camera offset such that it takes into account
 	// the alt camera state controlled by the Function keys.
 	switch (ALT_CAMERA_STATE) 
 	{
@@ -176,18 +184,25 @@ int *get_camera_offset()
     return xyz;
 }
 
+// Method to test if the robot is capable of moving in the x direction
+//
 int can_move_x()
 {
     // Assert that the robot is on a horizontal street.
     return !(Z_POS % BLOCK_LENGTH);
 }
 
+// Method to test if the robot is capable of moving in the z direction
+//
 int can_move_z()
 {
     // Assert that the robot is on a vertical street. 
     return !(X_POS % BLOCK_LENGTH);
 }
 
+// Method to implement the movement of the robot to the right
+//  Calls both can_move_x() and can_move_z() to ensure movement is possible
+//
 void turn_right_if_possible() 
 {
     // If we are at an intersection, turn the robot right.
@@ -211,6 +226,9 @@ void turn_right_if_possible()
     }   
 }
 
+// Method to implement the movement of the robot to the left
+//  Calls both can_move_x() and can_move_z() to ensure movement is possible
+//
 void turn_left_if_possible() 
 {
     // If we are at an intersection, turn the robot left.
@@ -234,6 +252,8 @@ void turn_left_if_possible()
     }
 }
 
+// Method to implement the movement of the robot in the opposite direction
+//
 void turn_around() 
 {
     // Turn the robot in the opposite direction it is facing.
@@ -289,6 +309,8 @@ void move_forward()
     }
 }
 
+// Keyboard callback function for movement of the robot in the 4 cardinal directions
+//
 void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
@@ -305,6 +327,7 @@ void keyboard(unsigned char key, int x, int y)
     case 115: // "s"
         turn_around();
         break;
+//TODO: implement the "pause" and "return" functions from the project description
     default:
         printf("Not a movement key: %d\n", key);
         fflush(stdout);
@@ -324,6 +347,8 @@ void special_keyboard_up(int key, int x, int y)
 	}
 }
 
+// Keyboard callback function for movement of the observing camera in various directions
+//
 void special_keyboard(int key, int x, int y)
 {
 	switch(key)
@@ -381,6 +406,7 @@ void special_keyboard(int key, int x, int y)
 	}
 }
 
+//Main Loop
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
