@@ -74,8 +74,8 @@ void display(void)
     for (int i = -2; i < 5; i += 2)
     {
         glBegin(GL_LINES);
-        glVertex3f((GLfloat)i, 0.0, -100.0);
-        glVertex3f((GLfloat)i, 0.0, 100.0);
+        glVertex3f((GLfloat)i, 0.0, -4.0);
+        glVertex3f((GLfloat)i, 0.0, 4.0);
         glEnd();
     }
     glPopMatrix();
@@ -86,8 +86,8 @@ void display(void)
     for (int i = -2; i < 5; i += 2)
     {
         glBegin(GL_LINES);
-        glVertex3f(-100.0, 0.0, (GLfloat)i);
-        glVertex3f(100.0, 0.0, (GLfloat)i);
+        glVertex3f(-3.0, 0.0, (GLfloat)i);
+        glVertex3f(3.0, 0.0, (GLfloat)i);
         glEnd();
     }
     glPopMatrix();
@@ -136,7 +136,6 @@ void reshape(int w, int h)
 }
 
 // Method to calculate the new location of the camera after an F-key has been selected
-//
 int *get_camera_offset()
 {
     // Return the offset (array of x, y, z) from the
@@ -150,37 +149,181 @@ int *get_camera_offset()
     case FACE_FORWARD:
         xyz[0] = X_POS;
         xyz[2] = Z_POS - 5;
+
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[0]+=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[0]-=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]+=5;
+            xyz[2]+=10;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]-=5;
+            xyz[2]+=10;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;             
+		default: 
+			break;
+        }
         break;
     case FACE_BACK:
         xyz[0] = X_POS;
         xyz[2] = Z_POS + 5;
+
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[0]-=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[0]+=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]-=5;
+            xyz[2]-=10;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]+=5;
+            xyz[2]-=10;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;             
+		default: 
+			break;
+        }
         break;
     case FACE_RIGHT: 
         xyz[0] = X_POS + 5; 
         xyz[2] = Z_POS;
-        break;
+
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[2]+=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[2]-=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]-=10;
+            xyz[2]+=5;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]-=10;
+            xyz[2]-=5;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;             
+		default: 
+			break;
+        }
+        break;        
     case FACE_LEFT: 
         xyz[0] = X_POS - 5;
         xyz[2] = Z_POS;
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[2]-=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[2]+=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]+=10;
+            xyz[2]-=5;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]+=10;
+            xyz[2]+=5;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;             
+		default: 
+			break;
+        }
+        break;         
     default:
         break;
     }
-	// Modify the camera offset such that it takes into account
-	// the alt camera state controlled by the Function keys.
-	switch (ALT_CAMERA_STATE) 
-	{
-		// TODO: This doesn't work right, it needs to 
-		// know which direction it is facing. 
-		case BACK_LEFT: 
-			xyz[0] = xyz[0] - 5;
-			break;
-		case BACK_RIGHT: 
-			xyz[0] = xyz[0] + 5;
-			break;
-		default: 
-			break;
-	}
-	
     return xyz;
 }
 
