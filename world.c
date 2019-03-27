@@ -27,6 +27,7 @@ struct building
    double color[3];
    double sideLength; //Side length of building
    double height; //Height length of building
+   int health;
 };
 
 // A struct that represents a block in a city which can contain buildings
@@ -274,7 +275,7 @@ void init (void)
 {
   //generaets model of the city
   generateCity();
-  //dumps generate city data into terminal / for deubbing purposes only.
+  //dumps generate city data into terminal / for debugging purposes only.
   dumpCity();
 
    /* select clearing color 	*/
