@@ -16,7 +16,7 @@
 #include <GL/glu.h>
 
 
-#define MAX_BUILDINGS 6
+#define MAX_BUILDINGS 4
 #define BLOCKS_ROWS 14
 #define BLOCKS_COLUMNS 14
 #define BLOCKS_SZ 5.0
@@ -30,6 +30,7 @@ struct building
    double x; //X-coor of building relative to block center
    double z; //Z-coor of building relative to block center
    int health;
+   int style; // the style of the building.
    double color[3];
    double sideLength; //Side length of building
    double height; //Height length of building
@@ -54,6 +55,11 @@ double randDouble()
     return (double)rand() / (double)RAND_MAX ;
 }
 
+double pos(BLOCKS_SZ)
+{
+  return BLOCKS_SZ*0.1 +(rand() % 8);
+}
+
 // generateCity
 // inputs: changed within the define section
 // generates the model of the city as an array of blocks that contain an array of buildings.
@@ -64,12 +70,10 @@ void generateCity()
   double xLength = (BLOCKS_ROWS * (BLOCKS_SZ+GAPS_SZ))-GAPS_SZ;
   double yLength = (BLOCKS_COLUMNS * (BLOCKS_SZ+GAPS_SZ))-GAPS_SZ;
 
-  double xOffset = -(xLength/2);
-  double yOffset = -(yLength/2);
+  double xOffset = 0;
+  double yOffset = 0;
 
   int currentBlock = 0;
-
-  printf("%d %d \n", sizeof(city),sizeof(struct block));
 
   for (int i = 0; i < BLOCKS_ROWS; i++)
   {
@@ -82,10 +86,11 @@ void generateCity()
       currentBlock++;
 
       for (int k = 0; k < MAX_BUILDINGS; k++) {
-        city[currentBlock].buildings[k].sideLength = BLOCKS_SZ * (randDouble()*0.1+0.1); // The max sideleng is half the sideleng of the block
-        city[currentBlock].buildings[k].x = -(BLOCKS_SZ*0.5)+(BLOCKS_SZ*randDouble());//BLOCKS_SZ*0.5;
-        city[currentBlock].buildings[k].z = -(BLOCKS_SZ*0.5)+(BLOCKS_SZ*randDouble());//BLOCKS_SZ*0.5;
+        city[currentBlock].buildings[k].sideLength = BLOCKS_SZ*0.1;///((BLOCKS_SZ/3) * randDouble()); // The max sideleng is 1/3 the sideleng of the block
+        city[currentBlock].buildings[k].x = pos(BLOCKS_SZ); //(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
+        city[currentBlock].buildings[k].z = pos(BLOCKS_SZ);//(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
         city[currentBlock].buildings[k].health = 1;
+        city[currentBlock].buildings[k].style = (rand() % 2)+1;
         city[currentBlock].buildings[k].height = (randDouble()*5);
         city[currentBlock].buildings[k].color[0] = (randDouble()*0.5);
         city[currentBlock].buildings[k].color[1] = (randDouble()*0.5);
@@ -96,7 +101,6 @@ void generateCity()
 
   return;
 }
-
 
 // dumpCity
 // prints out city model for debugging
@@ -120,7 +124,7 @@ void dumpCity()
 
 // drawBuilding
 // draws a building
-void drawBuilding(double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3)
+void drawBuilding(double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3, int style)
 {
     double xhalfside = xlength / 2;
     double zhalfside = zlength / 2;
@@ -128,51 +132,61 @@ void drawBuilding(double x1, double z1, double xlength, double hlength, double z
     glTranslatef(x1,0,z1);
 
     glColor3d(c1,c2,c3);
-    glBegin(GL_QUADS);
+    if (style == 1)
+    {
+      glBegin(GL_QUADS);
 
-   // Far face.  Green, 50% opaque, non-uniform texture cooridinates.
-   glNormal3f( 0.0f, 0.0f,-1.0f);
+     // Far face.  Green, 50% opaque, non-uniform texture cooridinates.
+     glNormal3f( 0.0f, 0.0f,-1.0f);
 
-   glVertex3f(-xhalfside, 0.0f, -zhalfside);
-   glVertex3f(-xhalfside, hlength, -zhalfside);
-   glVertex3f( xhalfside, hlength, -zhalfside);
-   glVertex3f( xhalfside, 0.0f, -zhalfside);
+     glVertex3f(-xhalfside, 0.0f, -zhalfside);
+     glVertex3f(-xhalfside, hlength, -zhalfside);
+     glVertex3f( xhalfside, hlength, -zhalfside);
+     glVertex3f( xhalfside, 0.0f, -zhalfside);
 
-   // Right face.  Blue; 25% opaque
-   glNormal3f( 1.0f, 0.0f, 0.0f);
+     // Right face.  Blue; 25% opaque
+     glNormal3f( 1.0f, 0.0f, 0.0f);
 
-   glVertex3f( xhalfside, 0.0f, -zhalfside);
-   glVertex3f( xhalfside, hlength, -zhalfside);
-   glVertex3f( xhalfside, hlength,  zhalfside);
-   glVertex3f( xhalfside, 0.0f,  zhalfside);
+     glVertex3f( xhalfside, 0.0f, -zhalfside);
+     glVertex3f( xhalfside, hlength, -zhalfside);
+     glVertex3f( xhalfside, hlength,  zhalfside);
+     glVertex3f( xhalfside, 0.0f,  zhalfside);
 
-   // Front face; offset.  Multi-colored, 50% opaque.
-   glNormal3f( 0.0f, 0.0f, 1.0f);
+     // Front face; offset.  Multi-colored, 50% opaque.
+     glNormal3f( 0.0f, 0.0f, 1.0f);
 
-   glVertex3f(-xhalfside, 0.0f, zhalfside);
-   glVertex3f( xhalfside, 0.0f, zhalfside);
-   glVertex3f( xhalfside, hlength, zhalfside);
-   glVertex3f(-xhalfside, hlength, zhalfside);
+     glVertex3f(-xhalfside, 0.0f, zhalfside);
+     glVertex3f( xhalfside, 0.0f, zhalfside);
+     glVertex3f( xhalfside, hlength, zhalfside);
+     glVertex3f(-xhalfside, hlength, zhalfside);
 
 
-   // Left Face; offset.  Yellow, varying levels of opaque.
-   glNormal3f(-1.0f, 0.0f, 0.0f);
+     // Left Face; offset.  Yellow, varying levels of opaque.
+     glNormal3f(-1.0f, 0.0f, 0.0f);
 
-   glVertex3f(-xhalfside, 0.0f, -zhalfside);
-   glVertex3f(-xhalfside, 0.0f,  zhalfside);
-   glVertex3f(-xhalfside, hlength,  zhalfside);
-   glVertex3f(-xhalfside, hlength, -zhalfside);
+     glVertex3f(-xhalfside, 0.0f, -zhalfside);
+     glVertex3f(-xhalfside, 0.0f,  zhalfside);
+     glVertex3f(-xhalfside, hlength,  zhalfside);
+     glVertex3f(-xhalfside, hlength, -zhalfside);
 
-   // Top Face; offset.  Yellow, varying levels of opaque.
-   glNormal3f(0.0f, 1.0f, 0.0f);
+     // Top Face; offset.  Yellow, varying levels of opaque.
+     glNormal3f(0.0f, 1.0f, 0.0f);
 
-   glVertex3f(xhalfside, hlength, zhalfside);
-   glVertex3f(xhalfside, hlength,  -zhalfside);
-   glVertex3f(-xhalfside, hlength, -zhalfside);
-   glVertex3f(-xhalfside, hlength, zhalfside);
+     glVertex3f(xhalfside, hlength, zhalfside);
+     glVertex3f(xhalfside, hlength,  -zhalfside);
+     glVertex3f(-xhalfside, hlength, -zhalfside);
+     glVertex3f(-xhalfside, hlength, zhalfside);
 
-   // All polygons have been drawn.
-   glEnd();
+     // All polygons have been drawn.
+     glEnd();
+   }
+   else if(style == 2)
+   {
+     glRotatef(270, 1.0, 0.0, 0.0);
+     GLUquadricObj *quadratic;
+     quadratic = gluNewQuadric();
+     gluCylinder(quadratic, xlength, zlength, hlength, 32, 32);
+   }
 }
 
 // drawBlock
@@ -213,7 +227,9 @@ void renderCity()
         city[currentBlock].buildings[i].sideLength,
         city[currentBlock].buildings[i].color[0],
         city[currentBlock].buildings[i].color[1],
-        city[currentBlock].buildings[i].color[2]);
+        city[currentBlock].buildings[i].color[2],
+        city[currentBlock].buildings[i].style
+      );
         glPopMatrix();
       }
 
