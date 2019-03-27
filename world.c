@@ -47,6 +47,235 @@ struct block
 
 struct block city[BLOCKS_ROWS * BLOCKS_COLUMNS];
 
+// New
+
+int BLOCK_LENGTH = 2;
+
+// This is the default position 
+// of the robot. 
+float X_POS = 3.5; 
+float Y_POS = 0.0;
+float Z_POS = 0.0;
+
+enum facing
+{
+    FACE_FORWARD,
+    FACE_RIGHT,
+    FACE_BACK,
+    FACE_LEFT
+};
+
+int FACING_STATE = FACE_FORWARD;
+
+enum alert_camera_views
+{
+	// Each of these descriptions are 
+	// relative to the  robots center.
+	FRONT_LEFT, // "F8"
+	FRONT_RIGHT, // "F7"
+	BACK_LEFT, // "F5"
+	BACK_RIGHT, // "F6"
+	FRONT_LEFT_FAR, // "F9"
+	FRONT_RIGHT_FAR, // "F10"
+	BACK_LEFT_FAR, // "F11"
+	BACK_RIGHT_FAR, // "F12"
+	DEFAULT // "No function key pressed"
+};
+int ALT_CAMERA_STATE = DEFAULT;
+
+float *get_camera_offset()
+{
+    // Return the offset (array of x, y, z) from the
+    // robot center to the camera 'eye' coordinates. 
+    static float xyz[3];
+
+    xyz[1] = Y_POS + 2;
+
+    switch (FACING_STATE)
+    {
+    case FACE_FORWARD:
+        xyz[0] = X_POS;
+        xyz[2] = Z_POS - 5;
+
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[0]+=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[0]-=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]+=5;
+            xyz[2]+=10;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]-=5;
+            xyz[2]+=10;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;             
+		default: 
+			break;
+        }
+        break;
+    case FACE_BACK:
+        xyz[0] = X_POS;
+        xyz[2] = Z_POS + 5;
+
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[0]-=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[0]+=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]-=5;
+            xyz[2]-=10;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]+=5;
+            xyz[2]-=10;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;             
+		default: 
+			break;
+        }
+        break;
+    case FACE_RIGHT: 
+        xyz[0] = X_POS + 5; 
+        xyz[2] = Z_POS;
+
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[2]+=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[2]-=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]-=10;
+            xyz[2]+=5;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]-=10;
+            xyz[2]-=5;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;             
+		default: 
+			break;
+        }
+        break;        
+    case FACE_LEFT: 
+        xyz[0] = X_POS - 5;
+        xyz[2] = Z_POS;
+        switch (ALT_CAMERA_STATE)
+        {
+        case BACK_LEFT: 
+            xyz[2]-=5;
+			break;
+        case BACK_LEFT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;
+		case BACK_RIGHT: 
+            xyz[2]+=5;
+			break;
+        case BACK_RIGHT_FAR: 
+            xyz[0]-=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;            
+        case FRONT_LEFT: 
+            xyz[0]+=10;
+            xyz[2]-=5;
+			break;
+        case FRONT_LEFT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]-=100;
+			break;              
+		case FRONT_RIGHT: 
+            xyz[0]+=10;
+            xyz[2]+=5;
+			break;
+        case FRONT_RIGHT_FAR: 
+            xyz[0]+=100;
+            xyz[1]+=100;
+            xyz[2]+=100;
+			break;             
+		default: 
+			break;
+        }
+        break;         
+    default:
+        break;
+    }
+    return xyz;
+}
+
+// \New
+
 //returns random double between 0 & 1
 // used for city generation
 double randDouble()
@@ -233,14 +462,37 @@ void display(void)
 
 	//printf("%f %f %f \n",eyeX, eyeY, eyeZ);
    /* Viewing transformation */
-   gluLookAt(eyeX, eyeY, eyeZ,   /* Eye */
-             0.0, 0.0, 0.0,   /* Look at */
-             0.0, 1.0, 0.0);  /* Up vector */
+
+   float *p = get_camera_offset();
+   gluLookAt(p[0], p[1], p[2], X_POS, Y_POS, Z_POS, 0.0, 1.0, 0.0);
 
   // The Main function that renders blocks & buildings
   renderCity();
 
+  glPushMatrix();
+  glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS + 0.7, (GLfloat)Z_POS);
+
+  switch (FACING_STATE)
+  // Rotate the robot according to the direction it is facing. 
+  {
+  case FACE_FORWARD:
+      glRotatef(0.0, 0.0, 1.0, 0.0);
+      break;
+  case FACE_RIGHT:
+      glRotatef(270.0, 0.0, 1.0, 0.0);
+      break;
+  case FACE_BACK:
+      glRotatef(180.0, 0.0, 1.0, 0.0);
+      break;
+  case FACE_LEFT:
+      glRotatef(90.0, 0.0, 1.0, 0.0);
+      break;
+  default:
+      break;
+  }
+
   draw_robot();
+  glPopMatrix();
 
   //Render Ground
   glPushMatrix();
