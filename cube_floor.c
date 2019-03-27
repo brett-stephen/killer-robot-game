@@ -26,6 +26,7 @@ Ex. Intersections every 2 units
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cube_floor.h"
 #include "draw_robot.h"
 
 int BLOCK_LENGTH = 2;
@@ -33,114 +34,92 @@ int X_POS = 0;
 int Y_POS = 0;
 int Z_POS = 0;
 
-enum facing
-{
-    FACE_FORWARD,
-    FACE_RIGHT,
-    FACE_BACK,
-    FACE_LEFT
-};
-
 int FACING_STATE = FACE_FORWARD;
 
-enum alert_camera_views
-{
-	// Each of these descriptions are 
-	// relative to the  robots center.
-	FRONT_LEFT, // "F8"
-	FRONT_RIGHT, // "F7"
-	BACK_LEFT, // "F5"
-	BACK_RIGHT, // "F6"
-	FRONT_LEFT_FAR, // "F9"
-	FRONT_RIGHT_FAR, // "F10"
-	BACK_LEFT_FAR, // "F11"
-	BACK_RIGHT_FAR, // "F12"
-	DEFAULT // "No function key pressed"
-};
 int ALT_CAMERA_STATE = DEFAULT;
 
-void display(void)
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+// void display(void)
+// {
+//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//     glMatrixMode(GL_MODELVIEW);
+//     glLoadIdentity();
 
-    int *p = get_camera_offset();
-    gluLookAt(p[0], p[1], p[2], X_POS, Y_POS, Z_POS, 0.0, 1.0, 0.0);
+//     float *p = get_camera_offset();
+//     gluLookAt(p[0], p[1], p[2], X_POS, Y_POS, Z_POS, 0.0, 1.0, 0.0);
 
-    // Draw the vertical lines
-    glPushMatrix();
-    glColor3f(0.0, 1.0, 0.0);
-    for (int i = -2; i < 5; i += 2)
-    {
-        glBegin(GL_LINES);
-        glVertex3f((GLfloat)i, 0.0, -4.0);
-        glVertex3f((GLfloat)i, 0.0, 4.0);
-        glEnd();
-    }
-    glPopMatrix();
+//     // Draw the vertical lines
+//     glPushMatrix();
+//     glColor3f(0.0, 1.0, 0.0);
+//     for (int i = -2; i < 5; i += 2)
+//     {
+//         glBegin(GL_LINES);
+//         glVertex3f((GLfloat)i, 0.0, -4.0);
+//         glVertex3f((GLfloat)i, 0.0, 4.0);
+//         glEnd();
+//     }
+//     glPopMatrix();
 
-    // Draw the horizontal lines
-    glPushMatrix();
-    glColor3f(0.0, 0.0, 1.0);
-    for (int i = -2; i < 5; i += 2)
-    {
-        glBegin(GL_LINES);
-        glVertex3f(-3.0, 0.0, (GLfloat)i);
-        glVertex3f(3.0, 0.0, (GLfloat)i);
-        glEnd();
-    }
-    glPopMatrix();
+//     // Draw the horizontal lines
+//     glPushMatrix();
+//     glColor3f(0.0, 0.0, 1.0);
+//     for (int i = -2; i < 5; i += 2)
+//     {
+//         glBegin(GL_LINES);
+//         glVertex3f(-3.0, 0.0, (GLfloat)i);
+//         glVertex3f(3.0, 0.0, (GLfloat)i);
+//         glEnd();
+//     }
+//     glPopMatrix();
 
-    glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
+//     glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
 
-    switch (FACING_STATE)
-    // Rotate the robot according to the direction it is facing. 
-    {
-    case FACE_FORWARD:
-        glRotatef(0.0, 0.0, 1.0, 0.0);
-        break;
-    case FACE_RIGHT:
-        glRotatef(270.0, 0.0, 1.0, 0.0);
-        break;
-    case FACE_BACK:
-        glRotatef(180.0, 0.0, 1.0, 0.0);
-        break;
-    case FACE_LEFT:
-        glRotatef(90.0, 0.0, 1.0, 0.0);
-        break;
-    default:
-        break;
-    }
+//     switch (FACING_STATE)
+//     // Rotate the robot according to the direction it is facing. 
+//     {
+//     case FACE_FORWARD:
+//         glRotatef(0.0, 0.0, 1.0, 0.0);
+//         break;
+//     case FACE_RIGHT:
+//         glRotatef(270.0, 0.0, 1.0, 0.0);
+//         break;
+//     case FACE_BACK:
+//         glRotatef(180.0, 0.0, 1.0, 0.0);
+//         break;
+//     case FACE_LEFT:
+//         glRotatef(90.0, 0.0, 1.0, 0.0);
+//         break;
+//     default:
+//         break;
+//     }
 
-    draw_robot();
+//     draw_robot();
 
-    glutSwapBuffers();
-}
+//     glutSwapBuffers();
+// }
 
-void init(void)
-{
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glShadeModel(GL_FLAT);
-    glEnable(GL_DEPTH_TEST);
-}
+// void init(void)
+// {
+//     glClearColor(0.0, 0.0, 0.0, 0.0);
+//     glShadeModel(GL_FLAT);
+//     glEnable(GL_DEPTH_TEST);
+// }
 
-void reshape(int w, int h)
-{
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-4.0, 4.0, -4.0, 4.0, -1.0, 500.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
+// void reshape(int w, int h)
+// {
+//     glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+//     glMatrixMode(GL_PROJECTION);
+//     glLoadIdentity();
+//     glOrtho(-4.0, 4.0, -4.0, 4.0, -1.0, 500.0);
+//     glMatrixMode(GL_MODELVIEW);
+//     glLoadIdentity();
+// }
 
 // Method to calculate the new location of the camera after an F-key has been selected
-int *get_camera_offset()
+float *get_camera_offset()
 {
     // Return the offset (array of x, y, z) from the
     // robot center to the camera 'eye' coordinates. 
-    static int xyz[3];
+    static float xyz[3];
 
     xyz[1] = Y_POS + 2;
 
@@ -563,25 +542,25 @@ void special_keyboard(int key, int x, int y)
 	}
 }
 
-//Main Loop
-int main(int argc, char **argv)
-{
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(250, 250);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow(argv[0]);
+// //Main Loop
+// int main(int argc, char **argv)
+// {
+//     glutInit(&argc, argv);
+//     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+//     glutInitWindowSize(250, 250);
+//     glutInitWindowPosition(100, 100);
+//     glutCreateWindow(argv[0]);
 
-    init();
+//     init();
 
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutIdleFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special_keyboard);
-    glutSpecialUpFunc(special_keyboard_up);
+//     glutDisplayFunc(display);
+//     glutReshapeFunc(reshape);
+//     glutIdleFunc(display);
+//     glutKeyboardFunc(keyboard);
+//     glutSpecialFunc(special_keyboard);
+//     glutSpecialUpFunc(special_keyboard_up);
 
-    glutMainLoop();
+//     glutMainLoop();
 
-    return 0;
-}
+//     return 0;
+// }
