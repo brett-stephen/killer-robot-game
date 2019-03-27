@@ -1,5 +1,10 @@
 # Manhattan Massacre
 
+TODO: 
+- F1 F2 F3 camera angles 
+- Prevent movement past edge of world (with wall?)
+- Add clickable buildings to world
+
 Copyright John Zhang (1993)
 
 ```

@@ -1,3 +1,8 @@
+// Project: Manhattan Massacre
+// University of Lethbridge - CPSC3710
+// Project Deadline: April 1, 2019
+// Gideon Richter, Brett Dziedzic, Michelle Le, Sean Herridge-Berry
+
 //World Generation
 
 #include <stdlib.h>
@@ -12,8 +17,8 @@
 
 
 #define MAX_BUILDINGS 6
-#define BLOCKS_ROWS 14
-#define BLOCKS_COLUMNS 14
+#define BLOCKS_ROWS 20
+#define BLOCKS_COLUMNS 20
 #define BLOCKS_SZ 5.0
 #define GAPS_SZ 1.0
 

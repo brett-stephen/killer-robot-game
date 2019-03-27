@@ -1,7 +1,14 @@
+// Project: Manhattan Massacre
+// University of Lethbridge - CPSC3710
+// Project Deadline: April 1, 2019
+// Gideon Richter, Brett Dziedzic, Michelle Le, Sean Herridge-Berry
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <GL/glut.h>
 
+// Struct building
+// Defined to store characteristics of the building objects in the game
 struct building
 {
    int health;
