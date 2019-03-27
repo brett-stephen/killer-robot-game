@@ -15,6 +15,7 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
+#include "draw_robot.h"
 
 #define MAX_BUILDINGS 6
 #define BLOCKS_ROWS 20
@@ -238,6 +239,8 @@ void display(void)
 
   // The Main function that renders blocks & buildings
   renderCity();
+
+  draw_robot();
 
   //Render Ground
   glPushMatrix();
