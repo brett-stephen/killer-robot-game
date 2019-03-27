@@ -483,6 +483,11 @@ void special_keyboard_up(int key, int x, int y)
 {
 	switch(key)
 	{
+    case 1: // "F1"
+    case 2: // "F2"
+    case 3: // "F3" 
+        ROBOT_HEAD_DIRECTION = FORWARD;
+        break;
 	default: 
 		printf("Not a special control key up: %d\n", key);
 		fflush(stdout);
@@ -496,6 +501,15 @@ void special_keyboard(int key, int x, int y)
 {
 	switch(key)
 	{
+        case 1: // "F1"
+            ROBOT_HEAD_DIRECTION = FORWARD;
+            break;
+        case 2: // "F2"
+            ROBOT_HEAD_DIRECTION = LEFT;
+            break;
+        case 3: // "F3" 
+            ROBOT_HEAD_DIRECTION = RIGHT;
+            break;
 		case 4: // "F4" 
 			ALT_CAMERA_STATE = DEFAULT;
 			printf("Camera state: default\n");

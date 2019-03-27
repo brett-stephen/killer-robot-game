@@ -140,10 +140,10 @@ void draw_head()
   switch (ROBOT_HEAD_DIRECTION)
   {
   case RIGHT:
-    glRotatef(-90, 0.0, 1.0, 0.0);
+    glRotatef(-45, 0.0, 1.0, 0.0);
     break;
   case LEFT:
-    glRotatef(90, 0.0, 1.0, 0.0);
+    glRotatef(45, 0.0, 1.0, 0.0);
     break;
   case FORWARD:
     break;
