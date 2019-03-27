@@ -17,8 +17,8 @@
 
 
 #define MAX_BUILDINGS 6
-#define BLOCKS_ROWS 20
-#define BLOCKS_COLUMNS 20
+#define BLOCKS_ROWS 14
+#define BLOCKS_COLUMNS 14
 #define BLOCKS_SZ 5.0
 #define GAPS_SZ 1.0
 
@@ -29,10 +29,11 @@ struct building
 {
    double x; //X-coor of building relative to block center
    double z; //Z-coor of building relative to block center
+   int health;
    double color[3];
    double sideLength; //Side length of building
    double height; //Height length of building
-   int health;
+   //int health;
 };
 
 // A struct that represents a block in a city which can contain buildings
@@ -44,7 +45,7 @@ struct block
    struct building buildings[MAX_BUILDINGS]; // array of buildings on the block
 };
 
-struct block city[BLOCKS_ROWS * BLOCKS_COLUMNS];
+struct block city[ BLOCKS_ROWS * BLOCKS_COLUMNS +1];
 
 //returns random double between 0 & 1
 // used for city generation
@@ -68,6 +69,8 @@ void generateCity()
 
   int currentBlock = 0;
 
+  printf("%d %d \n", sizeof(city),sizeof(struct block));
+
   for (int i = 0; i < BLOCKS_ROWS; i++)
   {
     for (int j = 0; j < BLOCKS_COLUMNS; j++)
@@ -78,10 +81,11 @@ void generateCity()
 
       currentBlock++;
 
-      for (size_t k = 0; k < MAX_BUILDINGS; k++) {
+      for (int k = 0; k < MAX_BUILDINGS; k++) {
         city[currentBlock].buildings[k].sideLength = BLOCKS_SZ * (randDouble()*0.1+0.1); // The max sideleng is half the sideleng of the block
         city[currentBlock].buildings[k].x = -(BLOCKS_SZ*0.5)+(BLOCKS_SZ*randDouble());//BLOCKS_SZ*0.5;
         city[currentBlock].buildings[k].z = -(BLOCKS_SZ*0.5)+(BLOCKS_SZ*randDouble());//BLOCKS_SZ*0.5;
+        city[currentBlock].buildings[k].health = 1;
         city[currentBlock].buildings[k].height = (randDouble()*5);
         city[currentBlock].buildings[k].color[0] = (randDouble()*0.5);
         city[currentBlock].buildings[k].color[1] = (randDouble()*0.5);
@@ -281,7 +285,7 @@ void init (void)
   //generaets model of the city
   generateCity();
   //dumps generate city data into terminal / for debugging purposes only.
-  dumpCity();
+  //dumpCity();
 
    /* select clearing color 	*/
    glClearColor (0.3, 0.53, 0.92, 0.0);
