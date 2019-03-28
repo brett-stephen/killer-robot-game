@@ -121,49 +121,61 @@ float *get_camera_offset()
     // robot center to the camera 'eye' coordinates. 
     static float xyz[3];
 
-    xyz[1] = Y_POS + 4;
+    float camera_height = Y_POS + 4.0;
+    xyz[1] = camera_height;
 
+    // Equal XYZ distance to move camera for F9, F10, F11, and F12 angles
+    float far_camera_distance = 20.0;
+    // Distance left/right of the robot for F5, F6, F7, and F8 angles
+    float close_camera_lateral_offset = 3.0;
+    // Distance to follow the robot from behind
+    float close_camera_follow_distance = 5.0;
+    // Distance to move camera such that it is facing the front of the robot
+    float close_camera_front_offset = close_camera_follow_distance * 2.0;
+
+    // Here begins the,
+    // The Unholy Relative Camera Movement Switch Statement of Doom.
     switch (FACING_STATE)
     {
     case FACE_FORWARD:
         xyz[0] = X_POS;
-        xyz[2] = Z_POS - 5;
+        xyz[2] = Z_POS - close_camera_follow_distance;
 
         switch (ALT_CAMERA_STATE)
         {
         case BACK_LEFT: 
-            xyz[0]+=5;
+            xyz[0]+=close_camera_lateral_offset;
 			break;
         case BACK_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;
 		case BACK_RIGHT: 
-            xyz[0]-=5;
+            xyz[0]-=close_camera_lateral_offset;
 			break;
         case BACK_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;            
         case FRONT_LEFT: 
-            xyz[0]+=5;
-            xyz[2]+=10;
+            xyz[0]+=close_camera_lateral_offset;
+            xyz[2]+=close_camera_front_offset;
 			break;
         case FRONT_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;              
 		case FRONT_RIGHT: 
-            xyz[0]-=5;
+            xyz[0]-=close_camera_lateral_offset;
             xyz[2]+=10;
 			break;
         case FRONT_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;             
 		default: 
 			break;
@@ -171,130 +183,130 @@ float *get_camera_offset()
         break;
     case FACE_BACK:
         xyz[0] = X_POS;
-        xyz[2] = Z_POS + 5;
+        xyz[2] = Z_POS + close_camera_follow_distance;
 
         switch (ALT_CAMERA_STATE)
         {
         case BACK_LEFT: 
-            xyz[0]-=5;
+            xyz[0]-=close_camera_lateral_offset;
 			break;
         case BACK_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;
 		case BACK_RIGHT: 
-            xyz[0]+=5;
+            xyz[0]+=close_camera_lateral_offset;
 			break;
         case BACK_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;            
         case FRONT_LEFT: 
-            xyz[0]-=5;
-            xyz[2]-=10;
+            xyz[0]-=close_camera_lateral_offset;
+            xyz[2]-=close_camera_front_offset;
 			break;
         case FRONT_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;              
 		case FRONT_RIGHT: 
-            xyz[0]+=5;
-            xyz[2]-=10;
+            xyz[0]+=close_camera_lateral_offset;
+            xyz[2]-=close_camera_front_offset;
 			break;
         case FRONT_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;             
 		default: 
 			break;
         }
         break;
     case FACE_RIGHT: 
-        xyz[0] = X_POS + 5; 
+        xyz[0] = X_POS + close_camera_follow_distance; 
         xyz[2] = Z_POS;
 
         switch (ALT_CAMERA_STATE)
         {
         case BACK_LEFT: 
-            xyz[2]+=5;
+            xyz[2]+=close_camera_lateral_offset;
 			break;
         case BACK_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;
 		case BACK_RIGHT: 
-            xyz[2]-=5;
+            xyz[2]-=close_camera_lateral_offset;
 			break;
         case BACK_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;            
         case FRONT_LEFT: 
-            xyz[0]-=10;
-            xyz[2]+=5;
+            xyz[0]-=close_camera_front_offset;
+            xyz[2]+=close_camera_lateral_offset;
 			break;
         case FRONT_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;              
 		case FRONT_RIGHT: 
-            xyz[0]-=10;
-            xyz[2]-=5;
+            xyz[0]-=close_camera_front_offset;
+            xyz[2]-=close_camera_lateral_offset;
 			break;
         case FRONT_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;             
 		default: 
 			break;
         }
         break;        
     case FACE_LEFT: 
-        xyz[0] = X_POS - 5;
+        xyz[0] = X_POS - close_camera_follow_distance;
         xyz[2] = Z_POS;
         switch (ALT_CAMERA_STATE)
         {
         case BACK_LEFT: 
-            xyz[2]-=5;
+            xyz[2]-=close_camera_lateral_offset;
 			break;
         case BACK_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;
 		case BACK_RIGHT: 
-            xyz[2]+=5;
+            xyz[2]+=close_camera_lateral_offset;
 			break;
         case BACK_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]-=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;            
         case FRONT_LEFT: 
-            xyz[0]+=10;
-            xyz[2]-=5;
+            xyz[0]+=close_camera_front_offset;
+            xyz[2]-=close_camera_lateral_offset;
 			break;
         case FRONT_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]-=far_camera_distance;
 			break;              
 		case FRONT_RIGHT: 
-            xyz[0]+=10;
-            xyz[2]+=5;
+            xyz[0]+=close_camera_front_offset;
+            xyz[2]+=close_camera_lateral_offset;
 			break;
         case FRONT_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
+            xyz[0]+=far_camera_distance;
+            xyz[1]+=far_camera_distance;
+            xyz[2]+=far_camera_distance;
 			break;             
 		default: 
 			break;
