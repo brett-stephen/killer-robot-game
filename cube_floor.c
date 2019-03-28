@@ -29,7 +29,7 @@ Ex. Intersections every 2 units
 #include "cube_floor.h"
 #include "draw_robot.h"
 
-int BLOCK_LENGTH = 2;
+int BLOCK_LENGTH = 6; // Defines the size of a city block
 int X_POS = 0;
 int Y_POS = 0;
 int Z_POS = 0;
@@ -73,24 +73,24 @@ int ALT_CAMERA_STATE = DEFAULT;
 
 //     glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
 
-//     switch (FACING_STATE)
-//     // Rotate the robot according to the direction it is facing. 
-//     {
-//     case FACE_FORWARD:
-//         glRotatef(0.0, 0.0, 1.0, 0.0);
-//         break;
-//     case FACE_RIGHT:
-//         glRotatef(270.0, 0.0, 1.0, 0.0);
-//         break;
-//     case FACE_BACK:
-//         glRotatef(180.0, 0.0, 1.0, 0.0);
-//         break;
-//     case FACE_LEFT:
-//         glRotatef(90.0, 0.0, 1.0, 0.0);
-//         break;
-//     default:
-//         break;
-//     }
+    // switch (FACING_STATE)
+    // // Rotate the robot according to the direction it is facing. 
+    // {
+    // case FACE_FORWARD:
+    //     glRotatef(0.0, 0.0, 1.0, 0.0);
+    //     break;
+    // case FACE_RIGHT:
+    //     glRotatef(270.0, 0.0, 1.0, 0.0);
+    //     break;
+    // case FACE_BACK:
+    //     glRotatef(180.0, 0.0, 1.0, 0.0);
+    //     break;
+    // case FACE_LEFT:
+    //     glRotatef(90.0, 0.0, 1.0, 0.0);
+    //     break;
+    // default:
+    //     break;
+    // }
 
 //     draw_robot();
 
@@ -121,7 +121,7 @@ float *get_camera_offset()
     // robot center to the camera 'eye' coordinates. 
     static float xyz[3];
 
-    xyz[1] = Y_POS + 2;
+    xyz[1] = Y_POS + 4;
 
     switch (FACING_STATE)
     {
