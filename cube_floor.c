@@ -398,6 +398,13 @@ void move_forward()
     prevent_out_of_bounds();
 }
 
+void reset_robot_to_origin()
+{
+    X_POS = 0;
+    Y_POS = 0;
+    Z_POS = 0;
+}
+
 // Keyboard callback function for movement of the robot in the 4 cardinal
 // directions
 //
@@ -405,6 +412,9 @@ void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
+    case 114: // "r"
+        reset_robot_to_origin();
+        break;
     case 119: // "w"
         move_forward();
         break;
