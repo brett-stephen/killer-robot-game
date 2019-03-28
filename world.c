@@ -15,14 +15,14 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
+#include "draw_robot.h"
+#include "cube_floor.h"
 
 #define MAX_BUILDINGS 4
 #define BLOCKS_ROWS 14
 #define BLOCKS_COLUMNS 14
 #define BLOCKS_SZ 5.0
 #define GAPS_SZ 1.0
-
-static float eyeX =5.0f, eyeY = 5.0f, eyeZ = -1.0f; // for visualization, delete later.
 
 // A struct that represents a building in a city, which has a health, position and color
 struct building
@@ -47,6 +47,14 @@ struct block
 };
 
 struct block city[ BLOCKS_ROWS * BLOCKS_COLUMNS +1];
+
+// Coordinates of the robot, these are defined in `cube_floor.c`
+extern int X_POS; 
+extern int Y_POS;
+extern int Z_POS;
+// Indicates the direction that the robot is facing (forward, right, left, back)
+extern int FACING_STATE;
+
 
 //returns random double between 0 & 1
 // used for city generation
@@ -250,14 +258,39 @@ void display(void)
    /* Clear the current matrix */
    glLoadIdentity();
 
-	//printf("%f %f %f \n",eyeX, eyeY, eyeZ);
    /* Viewing transformation */
-   gluLookAt(eyeX, eyeY, eyeZ,   /* Eye */
-             0.0, 0.0, 0.0,   /* Look at */
-             0.0, 1.0, 0.0);  /* Up vector */
-
+  float *p = get_camera_offset();
+  gluLookAt(p[0], p[1], p[2], X_POS, Y_POS, Z_POS, 0.0, 1.0, 0.0);
   // The Main function that renders blocks & buildings
+
+  glPushMatrix();
+  float robotStreetOffset = BLOCKS_SZ / 2.0;
+  glTranslatef(robotStreetOffset, 0.0, robotStreetOffset);
   renderCity();
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
+  switch (FACING_STATE)
+    // Rotate the robot according to the direction it is facing. 
+    {
+    case FACE_FORWARD:
+        glRotatef(0.0, 0.0, 1.0, 0.0);
+        break;
+    case FACE_RIGHT:
+        glRotatef(270.0, 0.0, 1.0, 0.0);
+        break;
+    case FACE_BACK:
+        glRotatef(180.0, 0.0, 1.0, 0.0);
+        break;
+    case FACE_LEFT:
+        glRotatef(90.0, 0.0, 1.0, 0.0);
+        break;
+    default:
+        break;
+    }
+  draw_robot();
+  glPopMatrix();
 
   //Render Ground
   glPushMatrix();
@@ -295,10 +328,9 @@ void display(void)
    glFlush ();
 }
 
-
 void init (void)
 {
-  //generaets model of the city
+  //generates model of the city
   generateCity();
   //dumps generate city data into terminal / for debugging purposes only.
   //dumpCity();
@@ -323,65 +355,27 @@ void reshape(int w, int h)
    glMatrixMode(GL_MODELVIEW);
 }
 
-//////////////////////////////////////////////////////////
-// changes camera view
-//////////////////////////////////////////////////////////
-void mouse(int button, int state, int x, int y)
-{
-   switch (button) {
-      case GLUT_RIGHT_BUTTON:
-         if (state == GLUT_DOWN){
-      		eyeX = 5;
-      		eyeY = 5;
-      		eyeZ = 5;
-      	} else {
-          eyeX = -5;
-          eyeY = 5;
-          eyeZ = -5;
-        }
-         break;
-     case GLUT_LEFT_BUTTON:
-        if (state == GLUT_DOWN){
-         eyeX = -5;
-         eyeY = 5;
-         eyeZ = 5;
-       } else {
-         eyeX = -5;
-         eyeY = 5;
-         eyeZ = -5;
-       }
-        break;
-      default:
-         break;
-   }
-}
-
-//////////////////////////////////////////////////////////
-// spins or stops objects
-//////////////////////////////////////////////////////////
-void myCBKey(unsigned char key, int x, int y)
-{
-
-}
-
-///////////////////////////////d///////////////////////////
-// main func
-//////////////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
-   glutInit(&argc, argv);
+  glutInit(&argc, argv);
 
+  glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitWindowSize(1000, 800);
+  glutInitWindowPosition (100, 100);
+  glutCreateWindow (argv[0]);
+ 
+  init();
 
-   glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize(1000, 800);
-   glutInitWindowPosition (100, 100);
-   glutCreateWindow (argv[0]);
-   init();
-   glutDisplayFunc(display);
-   glutIdleFunc(display);
-   glutReshapeFunc(reshape);
-   glutMouseFunc(&mouse);
-   glutKeyboardFunc(&myCBKey);
-   glutMainLoop();
-   return 0;   /* We'll never be here.*/
+  glutDisplayFunc(display);
+  glutIdleFunc(display);
+  glutReshapeFunc(reshape);
+  
+  glutMouseFunc(NULL);
+  glutKeyboardFunc(keyboard);
+  glutSpecialFunc(special_keyboard);
+  glutSpecialUpFunc(special_keyboard_up);
+  
+  glutMainLoop();
+   
+  return 0;   
 }
