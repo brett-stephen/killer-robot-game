@@ -164,11 +164,14 @@ void draw_head()
 
 void draw_robot(void)
 {
+  glPushMatrix();
+  glTranslatef(0.0, 0.6, 0.0);
   draw_body();
   draw_front_rectangle();
   draw_rear_triangles();
   draw_neck();
   draw_head();
+  glPopMatrix();
 }
 
 void robot_keyboard_callback(unsigned char key, int x, int y)
