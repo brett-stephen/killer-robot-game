@@ -21,7 +21,7 @@
 #define MAX_BUILDINGS 6
 #define BLOCKS_ROWS 20
 #define BLOCKS_COLUMNS 20
-#define BLOCKS_SZ 6.0
+#define BLOCKS_SZ 5.0
 #define GAPS_SZ 1.0
 
 static float eyeX =5.0f, eyeY = 5.0f, eyeZ = -1.0f; // for visualization, delete later.
@@ -244,7 +244,8 @@ void display(void)
   // The Main function that renders blocks & buildings
 
   glPushMatrix();
-  glTranslatef(3.0, 0.0, 0.0);
+  float robotStreetOffset = BLOCKS_SZ / 2.0;
+  glTranslatef(robotStreetOffset, 0.0, robotStreetOffset);
   renderCity();
   glPopMatrix();
 
