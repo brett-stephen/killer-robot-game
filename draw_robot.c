@@ -173,15 +173,3 @@ void draw_robot(void)
   draw_head();
   glPopMatrix();
 }
-
-void robot_keyboard_callback(unsigned char key, int x, int y)
-{
-  switch(key) {
-    case 112: // f12
-      ROBOT_HEAD_DIRECTION = FORWARD;
-      // TODO: also change the lookAt for the robot
-      break;
-    default: 
-      break;
-  }
-}
