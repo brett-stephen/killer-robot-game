@@ -62,7 +62,7 @@ double randDouble()
     return (double)rand() / (double)RAND_MAX ;
 }
 
-double pos(BLOCKS_SZ)
+double pos()
 {
   return BLOCKS_SZ*0.1 +(rand() % 8);
 }
@@ -77,8 +77,8 @@ void generateCity()
   double xLength = (BLOCKS_ROWS * (BLOCKS_SZ+GAPS_SZ))-GAPS_SZ;
   double yLength = (BLOCKS_COLUMNS * (BLOCKS_SZ+GAPS_SZ))-GAPS_SZ;
 
-  double xOffset = 0;
-  double yOffset = 0;
+  double xOffset = -xLength / 2;
+  double yOffset = -yLength / 2;
 
   int currentBlock = 0;
 
@@ -94,8 +94,8 @@ void generateCity()
 
       for (int k = 0; k < MAX_BUILDINGS; k++) {
         city[currentBlock].buildings[k].sideLength = BLOCKS_SZ*0.1;///((BLOCKS_SZ/3) * randDouble()); // The max sideleng is 1/3 the sideleng of the block
-        city[currentBlock].buildings[k].x = pos(BLOCKS_SZ); //(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
-        city[currentBlock].buildings[k].z = pos(BLOCKS_SZ);//(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
+        city[currentBlock].buildings[k].x = pos(); //(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
+        city[currentBlock].buildings[k].z = pos();//(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
         city[currentBlock].buildings[k].health = 1;
         city[currentBlock].buildings[k].style = (rand() % 2)+1;
         city[currentBlock].buildings[k].height = (randDouble()*5);
