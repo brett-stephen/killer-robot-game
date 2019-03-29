@@ -340,29 +340,29 @@ void prevent_out_of_bounds()
     // The bounds here are based on the BLOCKS_COLUMNS in `world.c`, 
     // but I can't use those DEFINE's so I'll write a comment instead. 
 
-    // If BLOCKS_COLUMNS and BLOCKS_ROWS are both say, 20, then 10 blocks
+    // If BLOCKS_COLUMNS and BLOCKS_ROWS are both say, 14, then 7 blocks
     // extend in each direction. Multiply 10 by the size of the block (6)
-    // and you get 60, 60 - 1 is 59, which is the limit to the number of 
+    // and you get 42, 42 - 1 is 41, which is the limit to the number of 
     // times we can move in that direction from the origin. 
 
     // Instead of trying to restrict movement ahead of time, 
     // let it happen and correct it. This leads to fewer (0) 
     // problems. Magic!
-    if (Z_POS > 59) 
+    if (Z_POS > 41) 
     {
-        Z_POS = 59;
+        Z_POS = 41;
     }
-    if (Z_POS < -59)
+    if (Z_POS < -41)
     {
-        Z_POS = -59;
+        Z_POS = -41;
     }
-    if (X_POS > 59) 
+    if (X_POS > 41) 
     {
-        X_POS = 59;
+        X_POS = 41;
     }
-    if (X_POS < -59) 
+    if (X_POS < -41) 
     {
-        X_POS = -59;
+        X_POS = -41;
     }
 }
 
