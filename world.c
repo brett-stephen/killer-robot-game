@@ -34,7 +34,6 @@ struct building
    double color[3];
    double sideLength; //Side length of building
    double height; //Height length of building
-   //int health;
 };
 
 // A struct that represents a block in a city which can contain buildings
