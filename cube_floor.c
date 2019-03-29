@@ -4,7 +4,11 @@
 // Gideon Richter, Brett Dziedzic, Michelle Le, Sean Herridge-Berry
 
 /*
-Move a robot around with WASD.
+Move a robot around with QAZS
+z - move forward
+q - turn left
+a - turn right
+s - turn around
 
 The robot can only move along the street (line) it
 is on. It can always turn around and can turn right or
@@ -415,19 +419,19 @@ void keyboard(unsigned char key, int x, int y)
     case 114: // "r"
         reset_robot_to_origin();
         break;
-    case 119: // "w"
+    case 122: // "z"
         move_forward();
         break;
     case 97: // "a"
-        turn_left_if_possible();
-        break;
-    case 100: // "d"
         turn_right_if_possible();
+        break;
+    case 113: // "q"
+        turn_left_if_possible();
         break;
     case 115: // "s"
         turn_around();
         break;
-        // TODO: implement the "pause" and "return" functions from the project
+        // TODO: implement the "pause" function with "p"
         // description
     default:
         printf("Not a movement key: %d\n", key);
