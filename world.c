@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
+#include <time.h> 
 
 //Open GL
 #include <GL/gl.h>
@@ -16,7 +17,7 @@
 #include <GL/glu.h>
 
 
-#define MAX_BUILDINGS 4
+#define MAX_BUILDINGS 2
 #define BLOCKS_ROWS 14
 #define BLOCKS_COLUMNS 14
 #define BLOCKS_SZ 5.0
@@ -30,11 +31,12 @@ struct building
    double x; //X-coor of building relative to block center
    double z; //Z-coor of building relative to block center
    int health;
+   int type;
    int style; // the style of the building.
    double color[3];
    double sideLength; //Side length of building
    double height; //Height length of building
-   //int health;
+
 };
 
 // A struct that represents a block in a city which can contain buildings
@@ -46,18 +48,26 @@ struct block
    struct building buildings[MAX_BUILDINGS]; // array of buildings on the block
 };
 
-struct block city[ BLOCKS_ROWS * BLOCKS_COLUMNS +1];
+struct block city[ BLOCKS_ROWS * BLOCKS_COLUMNS];
 
 //returns random double between 0 & 1
 // used for city generation
 double randDouble()
 {
-    return (double)rand() / (double)RAND_MAX ;
+return 1;
+    //return (double)rand() / (double)RAND_MAX ;
 }
 
-double pos(BLOCKS_SZ)
+double pos()
 {
-  return BLOCKS_SZ*0.1 +(rand() % 8);
+
+  return -BLOCKS_SZ*0.25 +(rand() % 7);
+}
+
+//returns random int for building type, 0 (i.e indestructanble), 1 (i.e low health),or 2 (i.e high health)
+int randType()
+{ 
+    return (abs(rand()*8))%3 ;
 }
 
 // generateCity
@@ -83,19 +93,45 @@ void generateCity()
       city[currentBlock].z = yOffset + ((BLOCKS_SZ+GAPS_SZ)*j);
       city[currentBlock].sideLength = BLOCKS_SZ;
 
-      currentBlock++;
+      
 
       for (int k = 0; k < MAX_BUILDINGS; k++) {
         city[currentBlock].buildings[k].sideLength = BLOCKS_SZ*0.1;///((BLOCKS_SZ/3) * randDouble()); // The max sideleng is 1/3 the sideleng of the block
         city[currentBlock].buildings[k].x = pos(BLOCKS_SZ); //(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
         city[currentBlock].buildings[k].z = pos(BLOCKS_SZ);//(-BLOCKS_SZ*0.5) + ((BLOCKS_SZ - city[currentBlock].buildings[k].sideLength) * randDouble()) + (city[currentBlock].buildings[k].sideLength/2);
         city[currentBlock].buildings[k].health = 1;
+        city[currentBlock].buildings[k].type = randType();
         city[currentBlock].buildings[k].style = (rand() % 2)+1;
         city[currentBlock].buildings[k].height = (randDouble()*5);
-        city[currentBlock].buildings[k].color[0] = (randDouble()*0.5);
-        city[currentBlock].buildings[k].color[1] = (randDouble()*0.5);
-        city[currentBlock].buildings[k].color[2] = (randDouble()*0.5);
+       
+        //white if building is indestructable
+        //blue if it is high health
+        //yellow is it is low
+        if (city[currentBlock].buildings[k].type == 0)
+	{
+	city[currentBlock].buildings[k].color[0] = 1.0;
+        city[currentBlock].buildings[k].color[1] = 1.0;
+        city[currentBlock].buildings[k].color[2] = 1.0;
+        } else if (city[currentBlock].buildings[k].type ==1)
+        {	
+        city[currentBlock].buildings[k].color[0] = 1.0;
+        city[currentBlock].buildings[k].color[1] = 1.0;
+        city[currentBlock].buildings[k].color[2] = 0.0;
+        }else {
+	city[currentBlock].buildings[k].color[0] = 0.0;
+        city[currentBlock].buildings[k].color[1] = 1.0;
+        city[currentBlock].buildings[k].color[2] = 1.0;}
+
+//print out fpr debugging
+      printf("Building Data: %d x: %f z: %f sl: %f h: %f type: %d \n", k,
+      city[currentBlock].buildings[k].x,
+      city[currentBlock].buildings[k].z,
+      city[currentBlock].buildings[k].sideLength,
+      city[currentBlock].buildings[k].height,
+      city[currentBlock].buildings[k].type);
+    
       }
+currentBlock++;
     }
   }
 
@@ -210,8 +246,10 @@ void drawBlock(double c1,double c2,double c3)
 // renders the model of the city that is generated from initialization.
 void renderCity()
 {
+
+
   for (int currentBlock = 0; currentBlock < (BLOCKS_ROWS*BLOCKS_COLUMNS); currentBlock++)
-  {
+  { 
       glPushMatrix();
       glTranslatef(city[currentBlock].x,0,city[currentBlock].z); //translates block
       drawBlock(0.4,0.4,0.4); //draws block
@@ -219,6 +257,7 @@ void renderCity()
 
       for (int i = 0; i < MAX_BUILDINGS; i++) {
         glPushMatrix();
+
         //double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3)
         drawBuilding(city[currentBlock].buildings[i].x,
         city[currentBlock].buildings[i].z,
@@ -230,12 +269,49 @@ void renderCity()
         city[currentBlock].buildings[i].color[2],
         city[currentBlock].buildings[i].style
       );
+
         glPopMatrix();
       }
 
       glPopMatrix();
   }
 }
+
+
+void draw(){
+GLuint id =1;
+  for (int currentBlock = 0; currentBlock < (BLOCKS_ROWS*BLOCKS_COLUMNS); currentBlock++)
+  { 
+      glPushMatrix();
+      glTranslatef(city[currentBlock].x,0,city[currentBlock].z); //translates block
+      drawBlock(0.4,0.4,0.4); //draws block
+
+
+      for (int i = 0; i < MAX_BUILDINGS; i++) {
+        
+        id++;
+        glPushMatrix();
+        glPushName(id);
+        
+        //double x1, double z1, double xlength, double hlength, double zlength, double c1,double c2,double c3)
+        drawBuilding(city[currentBlock].buildings[i].x,
+        city[currentBlock].buildings[i].z,
+        city[currentBlock].buildings[i].sideLength,
+        city[currentBlock].buildings[i].height,
+        city[currentBlock].buildings[i].sideLength,
+        city[currentBlock].buildings[i].color[0],
+        city[currentBlock].buildings[i].color[1],
+        city[currentBlock].buildings[i].color[2],
+        city[currentBlock].buildings[i].style);
+        glPopName();
+        glPopMatrix();
+      }
+
+      glPopMatrix();
+  }
+
+}
+
 
 void display(void)
 {
@@ -258,6 +334,7 @@ void display(void)
 
   // The Main function that renders blocks & buildings
   renderCity();
+
 
   //Render Ground
   glPushMatrix();
@@ -319,15 +396,138 @@ void reshape(int w, int h)
    glLoadIdentity();
    glFrustum(-1.0, 1.0, /* Left and right boundary */
              -1.0, 1.0, /* bottom and top boundary */
-             1.5, 150.0); /* near and far boundary */
+             1.5, 100.0); /* near and far boundary */
    glMatrixMode(GL_MODELVIEW);
 }
+ 
+void processHits2 (GLint hits, GLuint buffer[])
+{
+   unsigned int i, j;
+   GLuint names, *ptr, minZ,*ptrNames, numberOfNames;
+
+   printf ("hits = %d\n", hits);
+   ptr = (GLuint *) buffer;
+   minZ = 0xffffffff;
+   for (i = 0; i < hits; i++) {	
+      names = *ptr;
+	  ptr++;
+	  if (*ptr < minZ) {
+		  numberOfNames = names;
+		  minZ = *ptr;
+		  ptrNames = ptr+2;
+	  }
+	  
+	  ptr += names+2;
+	}
+  printf ("The closest hit names are:");
+  ptr = ptrNames;
+  for (j = 0; j < numberOfNames; j++,ptr++) {
+     printf ("%d ", *ptr);
+  }
+  printf ("\n");
+}
+
+void damage(int index){
+int counter =0;
+int id =index;
+   for (int i =0; i<BLOCKS_ROWS*BLOCKS_COLUMNS; i++){
+	counter++;
+	for (int j =0; j<MAX_BUILDINGS; j++){
+		counter++;
+		if(counter == id){
+			if(city[i].buildings[j].type ==1 || city[i].buildings[j].type ==2){
+			//city[i].buildings[j].x =0;
+			//city[i].buildings[j].z =0;
+			//city[i].buildings[j].sideLength =0;
+			
+			city[i].buildings[j].height=2;
+		              printf("Destroyed building with: %d x: %f z: %f sl: %f h: %f type: %d \n", j,
+			      city[i].buildings[j].x,
+			      city[i].buildings[j].z,
+			      city[i].buildings[j].sideLength,
+			      city[i].buildings[j].height,
+			      city[i].buildings[j].type);
+
+			renderCity();
+			}
+		}
+
+	} 
+   }
+}
+
+
+#define SIZE 512 
+void attackBuilding(GLenum mode,GLdouble x,GLdouble y)
+{ 
+   GLuint selectBuf[SIZE];
+   GLuint total= sizeof(selectBuf)/sizeof(GLuint);
+   GLint hits;
+ 
+   GLint viewport[4];
+   GLdouble projection[16];
+
+   printf ("mouse x: %f y: %f\n",x,y);
+
+
+
+    if(mode == GL_SELECT){
+ 
+   glSelectBuffer(total,selectBuf);
+  glRenderMode(GL_SELECT);
+  
+
+
+   glInitNames();
+   //glPushName(0);
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+
+   glGetIntegerv (GL_VIEWPORT, viewport);
+   glGetDoublev (GL_PROJECTION_MATRIX, projection); //getting projection values
+
+   glLoadIdentity();
+
+   //Picking area for attacking
+   gluPickMatrix (x,glutGet(GLUT_WINDOW_HEIGHT)-y-1,2, 2, viewport);
+
+   glMultMatrixd(projection);
+   glMatrixMode (GL_MODELVIEW);
+  // if(mode == GL_SELECT){
+   draw();
+  // }
+   glPopMatrix ();
+//}
+   printf ("Names in Selection buffer. %d \n", selectBuf[0]);
+   printf ("hit mind. %d \n", selectBuf[1]);
+   printf ("hit maxd. %d \n", selectBuf[2]);
+   printf ("Closest building hit id: %d \n", selectBuf[3]);
+   hits = glRenderMode(GL_RENDER);
+	if(hits>=1){
+  	 processHits2(hits,selectBuf);
+         damage(selectBuf[3]);
+  	 } else
+	 { hits = glRenderMode(GL_RENDER);}
+}
+   
+hits = glRenderMode(GL_RENDER);
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glMatrixMode(GL_MODELVIEW);
+   glutPostRedisplay();
+   
+
+
+}
+
+
 
 //////////////////////////////////////////////////////////
 // changes camera view
 //////////////////////////////////////////////////////////
 void mouse(int button, int state, int x, int y)
 {
+GLenum mode;
    switch (button) {
       case GLUT_RIGHT_BUTTON:
          if (state == GLUT_DOWN){
@@ -342,10 +542,14 @@ void mouse(int button, int state, int x, int y)
          break;
      case GLUT_LEFT_BUTTON:
         if (state == GLUT_DOWN){
-         eyeX = -5;
-         eyeY = 5;
-         eyeZ = 5;
+         mode = GL_SELECT;
+	 attackBuilding(mode,x,y);
+         //eyeX = -5;
+         //eyeY = 5;
+         //eyeZ = 5;
        } else {
+         mode = GL_RENDER;
+         attackBuilding(mode,x,y);
          eyeX = -5;
          eyeY = 5;
          eyeZ = -5;
@@ -369,6 +573,8 @@ void myCBKey(unsigned char key, int x, int y)
 //////////////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
+
+   srand(time(0));
    glutInit(&argc, argv);
 
 
