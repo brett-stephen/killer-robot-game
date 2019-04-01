@@ -8,5 +8,5 @@ LIBRARIES = -lX11 -lXi -lXmu -lglut -lGL -lGLU -lm
 
 All: world
 
-world: world.o
-	$(CC) $(CFLAGS) -o $@ $(LIBDIR) $< $(LIBRARIES)
+world: world.c draw_robot.c cube_floor.c
+	$(CC) $(CFLAGS) draw_robot.c cube_floor.c -o $@ $(LIBDIR) $< $(LIBRARIES)

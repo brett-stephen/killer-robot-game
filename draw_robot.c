@@ -140,10 +140,10 @@ void draw_head()
   switch (ROBOT_HEAD_DIRECTION)
   {
   case RIGHT:
-    glRotatef(-90, 0.0, 1.0, 0.0);
+    glRotatef(-45, 0.0, 1.0, 0.0);
     break;
   case LEFT:
-    glRotatef(90, 0.0, 1.0, 0.0);
+    glRotatef(45, 0.0, 1.0, 0.0);
     break;
   case FORWARD:
     break;
@@ -164,21 +164,12 @@ void draw_head()
 
 void draw_robot(void)
 {
+  glPushMatrix();
+  glTranslatef(0.0, 0.6, 0.0);
   draw_body();
   draw_front_rectangle();
   draw_rear_triangles();
   draw_neck();
   draw_head();
-}
-
-void robot_keyboard_callback(unsigned char key, int x, int y)
-{
-  switch(key) {
-    case 112: // f12
-      ROBOT_HEAD_DIRECTION = FORWARD;
-      // TODO: also change the lookAt for the robot
-      break;
-    default: 
-      break;
-  }
+  glPopMatrix();
 }

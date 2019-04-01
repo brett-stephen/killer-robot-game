@@ -4,15 +4,19 @@
 // Gideon Richter, Brett Dziedzic, Michelle Le, Sean Herridge-Berry
 
 /*
-Move a robot around with WASD. 
+Move a robot around with QAZS
+z - move forward
+q - turn left
+a - turn right
+s - turn around
 
-The robot can only move along the street (line) it 
-is on. It can always turn around and can turn right or 
-left it is at an intersection (in place), otherwise, 
-nothing happens. 
+The robot can only move along the street (line) it
+is on. It can always turn around and can turn right or
+left it is at an intersection (in place), otherwise,
+nothing happens.
 
 Also, the camera follows the robot, by default from an elevated
-position directly behind - looking at its position. 
+position directly behind - looking at its position.
 
 Ex. Intersections every 2 units
   |  |  |  |  |
@@ -26,301 +30,217 @@ Ex. Intersections every 2 units
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cube_floor.h"
 #include "draw_robot.h"
 
-int BLOCK_LENGTH = 2;
+int BLOCK_LENGTH = 6; // Defines the size of a city block
 int X_POS = 0;
 int Y_POS = 0;
 int Z_POS = 0;
 
-enum facing
-{
-    FACE_FORWARD,
-    FACE_RIGHT,
-    FACE_BACK,
-    FACE_LEFT
-};
-
 int FACING_STATE = FACE_FORWARD;
 
-enum alert_camera_views
-{
-	// Each of these descriptions are 
-	// relative to the  robots center.
-	FRONT_LEFT, // "F8"
-	FRONT_RIGHT, // "F7"
-	BACK_LEFT, // "F5"
-	BACK_RIGHT, // "F6"
-	FRONT_LEFT_FAR, // "F9"
-	FRONT_RIGHT_FAR, // "F10"
-	BACK_LEFT_FAR, // "F11"
-	BACK_RIGHT_FAR, // "F12"
-	DEFAULT // "No function key pressed"
-};
 int ALT_CAMERA_STATE = DEFAULT;
 
-void display(void)
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    int *p = get_camera_offset();
-    gluLookAt(p[0], p[1], p[2], X_POS, Y_POS, Z_POS, 0.0, 1.0, 0.0);
-
-    // Draw the vertical lines
-    glPushMatrix();
-    glColor3f(0.0, 1.0, 0.0);
-    for (int i = -2; i < 5; i += 2)
-    {
-        glBegin(GL_LINES);
-        glVertex3f((GLfloat)i, 0.0, -4.0);
-        glVertex3f((GLfloat)i, 0.0, 4.0);
-        glEnd();
-    }
-    glPopMatrix();
-
-    // Draw the horizontal lines
-    glPushMatrix();
-    glColor3f(0.0, 0.0, 1.0);
-    for (int i = -2; i < 5; i += 2)
-    {
-        glBegin(GL_LINES);
-        glVertex3f(-3.0, 0.0, (GLfloat)i);
-        glVertex3f(3.0, 0.0, (GLfloat)i);
-        glEnd();
-    }
-    glPopMatrix();
-
-    glTranslatef((GLfloat)X_POS, (GLfloat)Y_POS, (GLfloat)Z_POS);
-
-    switch (FACING_STATE)
-    // Rotate the robot according to the direction it is facing. 
-    {
-    case FACE_FORWARD:
-        glRotatef(0.0, 0.0, 1.0, 0.0);
-        break;
-    case FACE_RIGHT:
-        glRotatef(270.0, 0.0, 1.0, 0.0);
-        break;
-    case FACE_BACK:
-        glRotatef(180.0, 0.0, 1.0, 0.0);
-        break;
-    case FACE_LEFT:
-        glRotatef(90.0, 0.0, 1.0, 0.0);
-        break;
-    default:
-        break;
-    }
-
-    draw_robot();
-
-    glutSwapBuffers();
-}
-
-void init(void)
-{
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glShadeModel(GL_FLAT);
-    glEnable(GL_DEPTH_TEST);
-}
-
-void reshape(int w, int h)
-{
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-4.0, 4.0, -4.0, 4.0, -1.0, 500.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
-
-// Method to calculate the new location of the camera after an F-key has been selected
-int *get_camera_offset()
+// Method to calculate the new location of the camera after an F-key has been
+// selected
+float *get_camera_offset()
 {
     // Return the offset (array of x, y, z) from the
-    // robot center to the camera 'eye' coordinates. 
-    static int xyz[3];
+    // robot center to the camera 'eye' coordinates.
+    static float xyz[3];
 
-    xyz[1] = Y_POS + 2;
+    float camera_height = Y_POS + 4.0;
+    xyz[1] = camera_height;
 
+    // Equal XYZ distance to move camera for F9, F10, F11, and F12 angles
+    float far_camera_distance = 20.0;
+    // Distance left/right of the robot for F5, F6, F7, and F8 angles
+    float close_camera_lateral_offset = 3.0;
+    // Distance to follow the robot from behind
+    float close_camera_follow_distance = 5.0;
+    // Distance to move camera such that it is facing the front of the robot
+    float close_camera_front_offset = close_camera_follow_distance * 2.0;
+
+    // Here begins the,
+    // The Unholy Relative Camera Movement Switch Statement of Doom.
     switch (FACING_STATE)
     {
     case FACE_FORWARD:
         xyz[0] = X_POS;
-        xyz[2] = Z_POS - 5;
+        xyz[2] = Z_POS - close_camera_follow_distance;
 
         switch (ALT_CAMERA_STATE)
         {
-        case BACK_LEFT: 
-            xyz[0]+=5;
-			break;
-        case BACK_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;
-		case BACK_RIGHT: 
-            xyz[0]-=5;
-			break;
-        case BACK_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;            
-        case FRONT_LEFT: 
-            xyz[0]+=5;
-            xyz[2]+=10;
-			break;
-        case FRONT_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;              
-		case FRONT_RIGHT: 
-            xyz[0]-=5;
-            xyz[2]+=10;
-			break;
-        case FRONT_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;             
-		default: 
-			break;
+        case BACK_LEFT:
+            xyz[0] += close_camera_lateral_offset;
+            break;
+        case BACK_LEFT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        case BACK_RIGHT:
+            xyz[0] -= close_camera_lateral_offset;
+            break;
+        case BACK_RIGHT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        case FRONT_LEFT:
+            xyz[0] += close_camera_lateral_offset;
+            xyz[2] += close_camera_front_offset;
+            break;
+        case FRONT_LEFT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        case FRONT_RIGHT:
+            xyz[0] -= close_camera_lateral_offset;
+            xyz[2] += 10;
+            break;
+        case FRONT_RIGHT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        default:
+            break;
         }
         break;
     case FACE_BACK:
         xyz[0] = X_POS;
-        xyz[2] = Z_POS + 5;
+        xyz[2] = Z_POS + close_camera_follow_distance;
 
         switch (ALT_CAMERA_STATE)
         {
-        case BACK_LEFT: 
-            xyz[0]-=5;
-			break;
-        case BACK_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;
-		case BACK_RIGHT: 
-            xyz[0]+=5;
-			break;
-        case BACK_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;            
-        case FRONT_LEFT: 
-            xyz[0]-=5;
-            xyz[2]-=10;
-			break;
-        case FRONT_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;              
-		case FRONT_RIGHT: 
-            xyz[0]+=5;
-            xyz[2]-=10;
-			break;
-        case FRONT_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;             
-		default: 
-			break;
+        case BACK_LEFT:
+            xyz[0] -= close_camera_lateral_offset;
+            break;
+        case BACK_LEFT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        case BACK_RIGHT:
+            xyz[0] += close_camera_lateral_offset;
+            break;
+        case BACK_RIGHT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        case FRONT_LEFT:
+            xyz[0] -= close_camera_lateral_offset;
+            xyz[2] -= close_camera_front_offset;
+            break;
+        case FRONT_LEFT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        case FRONT_RIGHT:
+            xyz[0] += close_camera_lateral_offset;
+            xyz[2] -= close_camera_front_offset;
+            break;
+        case FRONT_RIGHT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        default:
+            break;
         }
         break;
-    case FACE_RIGHT: 
-        xyz[0] = X_POS + 5; 
+    case FACE_RIGHT:
+        xyz[0] = X_POS + close_camera_follow_distance;
         xyz[2] = Z_POS;
 
         switch (ALT_CAMERA_STATE)
         {
-        case BACK_LEFT: 
-            xyz[2]+=5;
-			break;
-        case BACK_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;
-		case BACK_RIGHT: 
-            xyz[2]-=5;
-			break;
-        case BACK_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;            
-        case FRONT_LEFT: 
-            xyz[0]-=10;
-            xyz[2]+=5;
-			break;
-        case FRONT_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;              
-		case FRONT_RIGHT: 
-            xyz[0]-=10;
-            xyz[2]-=5;
-			break;
-        case FRONT_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;             
-		default: 
-			break;
+        case BACK_LEFT:
+            xyz[2] += close_camera_lateral_offset;
+            break;
+        case BACK_LEFT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        case BACK_RIGHT:
+            xyz[2] -= close_camera_lateral_offset;
+            break;
+        case BACK_RIGHT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        case FRONT_LEFT:
+            xyz[0] -= close_camera_front_offset;
+            xyz[2] += close_camera_lateral_offset;
+            break;
+        case FRONT_LEFT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        case FRONT_RIGHT:
+            xyz[0] -= close_camera_front_offset;
+            xyz[2] -= close_camera_lateral_offset;
+            break;
+        case FRONT_RIGHT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        default:
+            break;
         }
-        break;        
-    case FACE_LEFT: 
-        xyz[0] = X_POS - 5;
+        break;
+    case FACE_LEFT:
+        xyz[0] = X_POS - close_camera_follow_distance;
         xyz[2] = Z_POS;
         switch (ALT_CAMERA_STATE)
         {
-        case BACK_LEFT: 
-            xyz[2]-=5;
-			break;
-        case BACK_LEFT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;
-		case BACK_RIGHT: 
-            xyz[2]+=5;
-			break;
-        case BACK_RIGHT_FAR: 
-            xyz[0]-=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;            
-        case FRONT_LEFT: 
-            xyz[0]+=10;
-            xyz[2]-=5;
-			break;
-        case FRONT_LEFT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]-=100;
-			break;              
-		case FRONT_RIGHT: 
-            xyz[0]+=10;
-            xyz[2]+=5;
-			break;
-        case FRONT_RIGHT_FAR: 
-            xyz[0]+=100;
-            xyz[1]+=100;
-            xyz[2]+=100;
-			break;             
-		default: 
-			break;
+        case BACK_LEFT:
+            xyz[2] -= close_camera_lateral_offset;
+            break;
+        case BACK_LEFT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        case BACK_RIGHT:
+            xyz[2] += close_camera_lateral_offset;
+            break;
+        case BACK_RIGHT_FAR:
+            xyz[0] -= far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        case FRONT_LEFT:
+            xyz[0] += close_camera_front_offset;
+            xyz[2] -= close_camera_lateral_offset;
+            break;
+        case FRONT_LEFT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] -= far_camera_distance;
+            break;
+        case FRONT_RIGHT:
+            xyz[0] += close_camera_front_offset;
+            xyz[2] += close_camera_lateral_offset;
+            break;
+        case FRONT_RIGHT_FAR:
+            xyz[0] += far_camera_distance;
+            xyz[1] += far_camera_distance;
+            xyz[2] += far_camera_distance;
+            break;
+        default:
+            break;
         }
-        break;         
+        break;
     default:
         break;
     }
@@ -330,8 +250,7 @@ int *get_camera_offset()
 // Method to test if the robot is capable of moving in the x direction
 //
 int can_move_x()
-{
-    // Assert that the robot is on a horizontal street.
+{   
     return !(Z_POS % BLOCK_LENGTH);
 }
 
@@ -339,56 +258,55 @@ int can_move_x()
 //
 int can_move_z()
 {
-    // Assert that the robot is on a vertical street. 
     return !(X_POS % BLOCK_LENGTH);
 }
 
 // Method to implement the movement of the robot to the right
 //  Calls both can_move_x() and can_move_z() to ensure movement is possible
 //
-void turn_right_if_possible() 
+void turn_right_if_possible()
 {
     // If we are at an intersection, turn the robot right.
-    if (can_move_x() && can_move_z()) 
+    if (can_move_x() && can_move_z())
     {
-        switch(FACING_STATE) 
+        switch (FACING_STATE)
         {
-            case FACE_FORWARD: 
-                FACING_STATE = FACE_RIGHT;
-                break;
-            case FACE_BACK: 
-                FACING_STATE = FACE_LEFT;
-                break;
-            case FACE_RIGHT: 
-                FACING_STATE = FACE_BACK;
-                break;
-            case FACE_LEFT: 
-                FACING_STATE = FACE_FORWARD;
-                break;
+        case FACE_FORWARD:
+            FACING_STATE = FACE_RIGHT;
+            break;
+        case FACE_BACK:
+            FACING_STATE = FACE_LEFT;
+            break;
+        case FACE_RIGHT:
+            FACING_STATE = FACE_BACK;
+            break;
+        case FACE_LEFT:
+            FACING_STATE = FACE_FORWARD;
+            break;
         }
-    }   
+    }
 }
 
 // Method to implement the movement of the robot to the left
 //  Calls both can_move_x() and can_move_z() to ensure movement is possible
 //
-void turn_left_if_possible() 
+void turn_left_if_possible()
 {
     // If we are at an intersection, turn the robot left.
-    if (can_move_x() && can_move_z()) 
+    if (can_move_x() && can_move_z())
     {
-        switch(FACING_STATE) 
+        switch (FACING_STATE)
         {
-        case FACE_BACK: 
+        case FACE_BACK:
             FACING_STATE = FACE_RIGHT;
             break;
-        case FACE_FORWARD: 
+        case FACE_FORWARD:
             FACING_STATE = FACE_LEFT;
             break;
-        case FACE_RIGHT: 
+        case FACE_RIGHT:
             FACING_STATE = FACE_FORWARD;
             break;
-        case FACE_LEFT: 
+        case FACE_LEFT:
             FACING_STATE = FACE_BACK;
             break;
         }
@@ -397,80 +315,124 @@ void turn_left_if_possible()
 
 // Method to implement the movement of the robot in the opposite direction
 //
-void turn_around() 
+void turn_around()
 {
     // Turn the robot in the opposite direction it is facing.
-    switch(FACING_STATE) 
+    switch (FACING_STATE)
     {
-        case FACE_BACK: 
-            FACING_STATE = FACE_FORWARD; 
-            break;
-        case FACE_FORWARD: 
-            FACING_STATE = FACE_BACK;
-            break;
-        case FACE_RIGHT: 
-            FACING_STATE = FACE_LEFT;
-            break;
-        case FACE_LEFT: 
-            FACING_STATE = FACE_RIGHT;
-            break;
+    case FACE_BACK:
+        FACING_STATE = FACE_FORWARD;
+        break;
+    case FACE_FORWARD:
+        FACING_STATE = FACE_BACK;
+        break;
+    case FACE_RIGHT:
+        FACING_STATE = FACE_LEFT;
+        break;
+    case FACE_LEFT:
+        FACING_STATE = FACE_RIGHT;
+        break;
     }
 }
 
-void move_forward() 
+void prevent_out_of_bounds() 
+{
+    // The bounds here are based on the BLOCKS_COLUMNS in `world.c`, 
+    // but I can't use those DEFINE's so I'll write a comment instead. 
+
+    // If BLOCKS_COLUMNS and BLOCKS_ROWS are both say, 14, then 7 blocks
+    // extend in each direction. Multiply 10 by the size of the block (6)
+    // and you get 42, 42 - 1 is 41, which is the limit to the number of 
+    // times we can move in that direction from the origin. 
+
+    // Instead of trying to restrict movement ahead of time, 
+    // let it happen and correct it. This leads to fewer (0) 
+    // problems. Magic!
+    if (Z_POS > 41) 
+    {
+        Z_POS = 41;
+    }
+    if (Z_POS < -41)
+    {
+        Z_POS = -41;
+    }
+    if (X_POS > 41) 
+    {
+        X_POS = 41;
+    }
+    if (X_POS < -41) 
+    {
+        X_POS = -41;
+    }
+}
+
+void move_forward()
 {
     // Move the robot forward in the direction it is facing.
-    if (can_move_x()) 
+    if (can_move_x())
     {
         // Move right or left.
-        switch(FACING_STATE) 
+        switch (FACING_STATE)
         {
-            case FACE_RIGHT: 
-                X_POS -= 1; 
-                break;
-            case FACE_LEFT: 
-                X_POS += 1;
-                break;
-            default: 
-                break;
+        case FACE_RIGHT:
+            X_POS -= 1;
+            break;
+        case FACE_LEFT:
+            X_POS += 1;
+            break;
+        default:
+            break;
         }
     }
     if (can_move_z())
     {
         // Move up or down.
-        switch(FACING_STATE) 
+        switch (FACING_STATE)
         {
-            case FACE_BACK: 
-                Z_POS -= 1; 
-                break;
-            case FACE_FORWARD: 
-                Z_POS += 1;
-                break;
-            default: 
-                break;
+        case FACE_BACK:
+            Z_POS -= 1;
+            break;
+        case FACE_FORWARD:
+            Z_POS += 1;
+            break;
+        default:
+            break;
         }
     }
+    prevent_out_of_bounds();
 }
 
-// Keyboard callback function for movement of the robot in the 4 cardinal directions
+void reset_robot_to_origin()
+{
+    X_POS = 0;
+    Y_POS = 0;
+    Z_POS = 0;
+}
+
+// Keyboard callback function for movement of the robot in the 4 cardinal
+// directions
 //
 void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
-    case 119: // "w"
+    case 114: // "r"
+        reset_robot_to_origin();
+        break;
+    case 122: // "z"
         move_forward();
         break;
     case 97: // "a"
-        turn_left_if_possible();
-        break;
-    case 100: // "d"
         turn_right_if_possible();
+        break;
+    case 113: // "q"
+        turn_left_if_possible();
         break;
     case 115: // "s"
         turn_around();
         break;
-//TODO: implement the "pause" and "return" functions from the project description
+        // TODO: implement the "pause" function with "p"
+        // description
     default:
         printf("Not a movement key: %d\n", key);
         fflush(stdout);
@@ -481,93 +443,84 @@ void keyboard(unsigned char key, int x, int y)
 
 void special_keyboard_up(int key, int x, int y)
 {
-	switch(key)
-	{
-	default: 
-		printf("Not a special control key up: %d\n", key);
-		fflush(stdout);
-		break;
-	}
+    switch (key)
+    {
+    case 1: // "F1"
+    case 2: // "F2"
+    case 3: // "F3"
+        ROBOT_HEAD_DIRECTION = FORWARD;
+        break;
+    default:
+        printf("Not a special control key up: %d\n", key);
+        fflush(stdout);
+        break;
+    }
 }
 
-// Keyboard callback function for movement of the observing camera in various directions
+// Keyboard callback function for movement of the observing camera in various
+// directions
 //
 void special_keyboard(int key, int x, int y)
 {
-	switch(key)
-	{
-		case 4: // "F4" 
-			ALT_CAMERA_STATE = DEFAULT;
-			printf("Camera state: default\n");
-			fflush(stdout);
-			break;
-		case 5: // "F5"
-			ALT_CAMERA_STATE = BACK_LEFT;
-			printf("Camera state: Back left\n");
-			fflush(stdout);
-			break;
-		case 6: // "F6"
-			ALT_CAMERA_STATE = BACK_RIGHT;
-			printf("Camera state: Back right\n");
-			fflush(stdout);
-			break;
-		case 7: // "F7"
-			ALT_CAMERA_STATE = FRONT_RIGHT;
-			printf("Camera state: Front right\n");
-			fflush(stdout);
-			break;
-		case 8: // "F8"
-			ALT_CAMERA_STATE = FRONT_LEFT;
-			printf("Camera state: Front left\n");
-			fflush(stdout);
-			break;
-		case 9: // "F9"
-			ALT_CAMERA_STATE = BACK_LEFT_FAR;
-			printf("Camera state: Back left far\n");
-			fflush(stdout);
-			break;
-		case 10: // "F10"
-			ALT_CAMERA_STATE = BACK_RIGHT_FAR;
-			printf("Camera state: Back right far\n");
-			fflush(stdout);
-			break;
-		case 11: // "F11"
-			ALT_CAMERA_STATE = FRONT_RIGHT_FAR;
-			printf("Camera state: Front right far\n");
-			fflush(stdout);
-			break;
-		case 12: // "F12"
-			ALT_CAMERA_STATE = FRONT_LEFT_FAR;
-			printf("Camera state: Front left far\n");
-			fflush(stdout);
-			break;
-		default: 
-			printf("Not a special control key: %d\n", key);
-			fflush(stdout);
-			break;
-		
-	}
-}
-
-//Main Loop
-int main(int argc, char **argv)
-{
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(250, 250);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow(argv[0]);
-
-    init();
-
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutIdleFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special_keyboard);
-    glutSpecialUpFunc(special_keyboard_up);
-
-    glutMainLoop();
-
-    return 0;
+    switch (key)
+    {
+    case 1: // "F1"
+        ROBOT_HEAD_DIRECTION = FORWARD;
+        break;
+    case 2: // "F2"
+        ROBOT_HEAD_DIRECTION = LEFT;
+        break;
+    case 3: // "F3"
+        ROBOT_HEAD_DIRECTION = RIGHT;
+        break;
+    case 4: // "F4"
+        ALT_CAMERA_STATE = DEFAULT;
+        printf("Camera state: default\n");
+        fflush(stdout);
+        break;
+    case 5: // "F5"
+        ALT_CAMERA_STATE = BACK_LEFT;
+        printf("Camera state: Back left\n");
+        fflush(stdout);
+        break;
+    case 6: // "F6"
+        ALT_CAMERA_STATE = BACK_RIGHT;
+        printf("Camera state: Back right\n");
+        fflush(stdout);
+        break;
+    case 7: // "F7"
+        ALT_CAMERA_STATE = FRONT_RIGHT;
+        printf("Camera state: Front right\n");
+        fflush(stdout);
+        break;
+    case 8: // "F8"
+        ALT_CAMERA_STATE = FRONT_LEFT;
+        printf("Camera state: Front left\n");
+        fflush(stdout);
+        break;
+    case 9: // "F9"
+        ALT_CAMERA_STATE = BACK_LEFT_FAR;
+        printf("Camera state: Back left far\n");
+        fflush(stdout);
+        break;
+    case 10: // "F10"
+        ALT_CAMERA_STATE = BACK_RIGHT_FAR;
+        printf("Camera state: Back right far\n");
+        fflush(stdout);
+        break;
+    case 11: // "F11"
+        ALT_CAMERA_STATE = FRONT_RIGHT_FAR;
+        printf("Camera state: Front right far\n");
+        fflush(stdout);
+        break;
+    case 12: // "F12"
+        ALT_CAMERA_STATE = FRONT_LEFT_FAR;
+        printf("Camera state: Front left far\n");
+        fflush(stdout);
+        break;
+    default:
+        printf("Not a special control key: %d\n", key);
+        fflush(stdout);
+        break;
+    }
 }
