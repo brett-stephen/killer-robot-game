@@ -529,30 +529,14 @@ void mouse(int button, int state, int x, int y)
 {
 GLenum mode;
    switch (button) {
-      case GLUT_RIGHT_BUTTON:
-         if (state == GLUT_DOWN){
-      		eyeX = 5;
-      		eyeY = 5;
-      		eyeZ = 5;
-      	} else {
-          eyeX = -5;
-          eyeY = 5;
-          eyeZ = -5;
-        }
-         break;
      case GLUT_LEFT_BUTTON:
         if (state == GLUT_DOWN){
          mode = GL_SELECT;
 	 attackBuilding(mode,x,y);
-         //eyeX = -5;
-         //eyeY = 5;
-         //eyeZ = 5;
+
        } else {
          mode = GL_RENDER;
          attackBuilding(mode,x,y);
-         eyeX = -5;
-         eyeY = 5;
-         eyeZ = -5;
        }
         break;
       default:
