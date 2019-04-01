@@ -5,6 +5,9 @@ TODO:
 - Prevent movement past edge of world (with wall?)
 - Add clickable buildings to world
 
+Project Summary and Tutorial Available at:
+https://drive.google.com/drive/folders/1zmqXqSMWRlD3nxJGnsQFl6KDxQoI9KN7?usp=sharing
+
 Copyright John Zhang (1993)
 
 ```
