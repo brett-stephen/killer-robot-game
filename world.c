@@ -26,7 +26,7 @@
 #define BLOCKS_SZ 5.0
 #define GAPS_SZ 1.0
 #define PICK_TOL 1
-#define PICK_SIZE_BUFFER 256
+#define PICK_SIZE_BUFFER 16
 
 unsigned int PickBuffer[PICK_SIZE_BUFFER];
 int RenderMode;
@@ -63,6 +63,14 @@ extern int Z_POS;
 // Indicates the direction that the robot is facing (forward, right, left, back)
 extern int FACING_STATE;
 extern int ALT_CAMERA_STATE;
+
+void clear_picking_buffer()
+{
+  for (int i = 0; i < PICK_SIZE_BUFFER; i++) 
+  {
+    PickBuffer[i] = 0;
+  }
+}
 
 // returns random double between 0 & 1
 // used for city generation
@@ -456,6 +464,8 @@ void mouse(int button, int state, int x, int y)
   int z_min, z_max = 0;
   int item = -1;
 
+  clear_picking_buffer();
+
   switch (button)
   {
   case GLUT_LEFT_BUTTON:
@@ -530,6 +540,7 @@ void mouse(int button, int state, int x, int y)
     // From the picking tutorial. 
     Ymouse = y;
     Xmouse = x;
+    clear_picking_buffer();
     glutPostRedisplay();
   }
 }
