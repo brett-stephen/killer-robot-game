@@ -23,7 +23,7 @@
 #define BLOCKS_COLUMNS 14
 #define BLOCKS_SZ 5.0
 #define GAPS_SZ 1.0
-#define PICK_TOL 10
+#define PICK_TOL 1
 #define PICK_SIZE_BUFFER 256
 
 unsigned int PickBuffer[PICK_SIZE_BUFFER];
@@ -231,7 +231,7 @@ void drawBlock(double c1, double c2, double c3)
 // renders the model of the city that is generated from initialization.
 void renderCity()
 {
-  int building_id_number = 1;
+  int building_id_number = 0;
   for (int currentBlock = 0; currentBlock < (BLOCKS_ROWS * BLOCKS_COLUMNS);
        currentBlock++)
   {
@@ -243,9 +243,11 @@ void renderCity()
     for (int i = 0; i < MAX_BUILDINGS; i++)
     {
       // Name the next shape so we can identify it while picking
-      glLoadName(building_id_number++);
 
       glPushMatrix();
+      glLoadName(building_id_number);
+      building_id_number++;
+
       // double x1, double z1, double xlength, double hlength, double zlength,
       // double c1,double c2,double c3)
       drawBuilding(city[currentBlock].buildings[i].x,
@@ -434,7 +436,7 @@ void mouse(int button, int state, int x, int y)
 
       int i = 0;
       int index = 0;
-      int found = 0;
+
       for (; i < n_hits; i++)
       {
         n_items = PickBuffer[index++];
@@ -450,18 +452,22 @@ void mouse(int button, int state, int x, int y)
           printf("ITEM: %d at %d\n", item, j);
           fflush(stdout);
 
-          int building_id_number = 1;
+          int building_id_number = 0;
 
           for (int currentBlock = 0;
                currentBlock < (BLOCKS_ROWS * BLOCKS_COLUMNS); currentBlock++)
           {
-            for (int i = 0; i < MAX_BUILDINGS; i++)
+            for (int p = 0; p < MAX_BUILDINGS; p++)
             {
-              if (building_id_number == item && !found)
-              {
+              if (building_id_number == item)
+              { 
+                printf("Found one\n");
+                fflush(stdout);
                 // "Delete" a building by reducing its height to 0.
-                city[currentBlock].buildings[i].height = 0;
-                found = 1;
+                city[currentBlock].buildings[p].height = 0;
+                city[currentBlock].buildings[p].sideLength = 0;        
+                printf("X: %d, Y: %d\n", city[currentBlock].buildings[p].x, city[currentBlock].buildings[p].z);
+                fflush(stdout);   
               }
               building_id_number++;
             }
