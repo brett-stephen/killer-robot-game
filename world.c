@@ -62,6 +62,7 @@ extern int Y_POS;
 extern int Z_POS;
 // Indicates the direction that the robot is facing (forward, right, left, back)
 extern int FACING_STATE;
+extern int ALT_CAMERA_STATE;
 
 // returns random double between 0 & 1
 // used for city generation
@@ -458,7 +459,7 @@ void mouse(int button, int state, int x, int y)
   switch (button)
   {
   case GLUT_LEFT_BUTTON:
-    if (state == GLUT_DOWN)
+    if (state == GLUT_DOWN && ALT_CAMERA_STATE == DEFAULT)
     {
       RenderMode = GL_SELECT;
       glRenderMode(GL_SELECT);
