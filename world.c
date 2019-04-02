@@ -66,7 +66,7 @@ extern int ALT_CAMERA_STATE;
 
 void clear_picking_buffer()
 {
-  for (int i = 0; i < PICK_SIZE_BUFFER; i++) 
+  for (int i = 0; i < PICK_SIZE_BUFFER; i++)
   {
     PickBuffer[i] = 0;
   }
@@ -76,7 +76,10 @@ void clear_picking_buffer()
 // used for city generation
 double randDouble() { return (double)rand() / (double)RAND_MAX; }
 
-double pos() {return BLOCKS_SZ * 0.1 + (rand() % 8);}
+double pos(double building_sz) {
+  double available_area = BLOCKS_SZ - building_sz;
+  return (randDouble()*available_area) - (available_area/2);
+}
 
 // generateCity
 // inputs: changed within the define section
@@ -112,31 +115,31 @@ void generateCity()
         ///((BLOCKS_SZ/3) * randDouble()); // The max
         /// sideleng is 1/3 the sideleng of the block
         city[currentBlock].buildings[k].sideLength = BLOCKS_SZ * 0.1;
-        city[currentBlock].buildings[k].x = pos();
-        city[currentBlock].buildings[k].z = pos(); 
+        city[currentBlock].buildings[k].x = pos(city[currentBlock].buildings[k].sideLength);
+        city[currentBlock].buildings[k].z = pos(city[currentBlock].buildings[k].sideLength);
         city[currentBlock].buildings[k].health = 1;
         city[currentBlock].buildings[k].style = (rand() % 2) + 1;
         city[currentBlock].buildings[k].height = (randDouble() * 5);
-        
-        if (hardToDestroy) 
+
+        if (hardToDestroy)
         {
-          // Make the building bright green and 
+          // Make the building bright green and
           // make its health 4.
           city[currentBlock].buildings[k].color[0] = 0.0;
           city[currentBlock].buildings[k].color[1] = 1.0;
           city[currentBlock].buildings[k].color[2] = 0.0;
           city[currentBlock].buildings[k].health = 4;
-        } 
+        }
         else if (impossibleToDestroy)
         {
-          // Make the building bright blue and 
+          // Make the building bright blue and
           // make its health really high.
           city[currentBlock].buildings[k].color[0] = 0.0;
           city[currentBlock].buildings[k].color[1] = 0.0;
           city[currentBlock].buildings[k].color[2] = 1.0;
           city[currentBlock].buildings[k].health = 1000000;
-        } 
-        else 
+        }
+        else
         {
           // It's whatever color and has a health of one
           city[currentBlock].buildings[k].color[0] = (randDouble() * 0.5);
@@ -321,8 +324,8 @@ void display(void)
     viewport[2] = dx;
     viewport[3] = dy;
     gluPickMatrix(
-      (double)Xmouse, 
-      (double)(dy - Ymouse), 
+      (double)Xmouse,
+      (double)(dy - Ymouse),
       PICK_TOL,
       PICK_TOL,
       viewport);
@@ -450,14 +453,14 @@ void reshape(int w, int h)
 void mouse(int button, int state, int x, int y)
 {
   /*
-  When a user clicks the mouse on a building, the building should 
-  disappear. 
+  When a user clicks the mouse on a building, the building should
+  disappear.
 
-  Currently there is a bug where it is likely that the removal 
-  will be more successful if the mouse is double clicked. 
+  Currently there is a bug where it is likely that the removal
+  will be more successful if the mouse is double clicked.
 
   Also, sometimes more than one building disappears...
-  Also, this GL_SELECT seems to lag the program while it runs. 
+  Also, this GL_SELECT seems to lag the program while it runs.
   */
   int n_hits = -1;
   int n_items = -1;
@@ -477,10 +480,10 @@ void mouse(int button, int state, int x, int y)
       RenderMode = GL_RENDER;
       n_hits = glRenderMode(GL_RENDER);
 
-      int i = 0;
+      int i;
       int index = 0;
 
-      for (; i < n_hits; i++)
+      for (i=0; i < n_hits; i++)
       {
         n_items = PickBuffer[index++];
         z_min = PickBuffer[index++];
@@ -490,7 +493,7 @@ void mouse(int button, int state, int x, int y)
         fflush(stdout);
         for (int j = 0; j < n_items; j++)
         {
-          // item is the name of the object 
+          // item is the name of the object
           // that we defined in `renderCity`.
           item = PickBuffer[index++];
 
@@ -499,8 +502,8 @@ void mouse(int button, int state, int x, int y)
 
           int building_id_number = 0;
 
-          // Iterate every building searching for the one we just clicked on. 
-          // You could do this faster by doing some math about `item` and 
+          // Iterate every building searching for the one we just clicked on.
+          // You could do this faster by doing some math about `item` and
           // the block sizes, then just iterating up to `MAX_BUILDINGS`.
           for (int currentBlock = 0;
                currentBlock < (BLOCKS_ROWS * BLOCKS_COLUMNS); currentBlock++)
@@ -508,14 +511,14 @@ void mouse(int button, int state, int x, int y)
             for (int p = 0; p < MAX_BUILDINGS; p++)
             {
               if (building_id_number == item)
-              { 
-                // It is likely that we will find more than one, 
-                // although I am not sure how to tell when to stop 
+              {
+                // It is likely that we will find more than one,
+                // although I am not sure how to tell when to stop
                 // looking for things to delete. The first and last
                 // items found do not seem to correspond to near/far.
                 printf("Found one\n");
                 fflush(stdout);
-                // There are three types of buildings: 
+                // There are three types of buildings:
                 // - Normal, any color, 1 health
                 // - Hard, green, 4 health (3 clicks to destroy)
                 // - Impossible, blue, infinite health (cant destry)
@@ -523,9 +526,9 @@ void mouse(int button, int state, int x, int y)
                 {
                 // "Delete" a building by reducing its height to 0.
                   city[currentBlock].buildings[p].height = 0;
-                  city[currentBlock].buildings[p].sideLength = 0;        
-                } 
-                else 
+                  city[currentBlock].buildings[p].sideLength = 0;
+                }
+                else
                 {
                   // Decrease the health by one
                   city[currentBlock].buildings[p].health--;
@@ -537,7 +540,7 @@ void mouse(int button, int state, int x, int y)
         }
       }
     }
-    // From the picking tutorial. 
+    // From the picking tutorial.
     Ymouse = y;
     Xmouse = x;
     clear_picking_buffer();
