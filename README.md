@@ -28,6 +28,10 @@ https://drive.google.com/drive/folders/1zmqXqSMWRlD3nxJGnsQFl6KDxQoI9KN7?usp=sha
 # Screenshots
 
 ![An image of the robot](https://github.com/brett-stephen/killer-robot-game/blob/master/images/robot.png "Rob P. Bot")
+![The default camera angle in game](https://github.com/brett-stephen/killer-robot-game/blob/master/images/default_cam.png "Default Camera (F4)")
+![An rear angled view of the robot in game](https://github.com/brett-stephen/killer-robot-game/blob/master/images/back_left_cam.png "Back left Camera (F5)")
+![An front angled view of the robot in game](https://github.com/brett-stephen/killer-robot-game/blob/master/images/front_left_cam.png "Front left Camera (F7)")
+![A far camera angle with the whole world visible](https://github.com/brett-stephen/killer-robot-game/blob/master/images/far_cam.png "Far Camera (F9-F12)")
 
 
 ```
