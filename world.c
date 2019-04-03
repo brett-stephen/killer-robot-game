@@ -484,6 +484,7 @@ void mouse(int button, int state, int x, int y)
 
       if (n_hits == 0)
       {
+        // Try it again once.
         RenderMode = GL_SELECT;
         glRenderMode(GL_SELECT);
         display();
@@ -554,7 +555,7 @@ void mouse(int button, int state, int x, int y)
     // From the picking tutorial.
     Ymouse = y;
     Xmouse = x;
-    // clear_picking_buffer();
+    clear_picking_buffer();
     glutPostRedisplay();
   }
 }
