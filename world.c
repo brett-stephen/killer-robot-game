@@ -462,9 +462,11 @@ void mouse(int button, int state, int x, int y)
   Also, sometimes more than one building disappears...
   Also, this GL_SELECT seems to lag the program while it runs.
   */
+  Ymouse = y;
+  Xmouse = x;
   int n_hits = -1;
   int n_items = -1;
-  int z_min, z_max = 0;
+  unsigned int z_min, z_max = 0;
   int item = -1;
 
   clear_picking_buffer();
@@ -479,6 +481,15 @@ void mouse(int button, int state, int x, int y)
       display();
       RenderMode = GL_RENDER;
       n_hits = glRenderMode(GL_RENDER);
+
+      if (n_hits == 0)
+      {
+        RenderMode = GL_SELECT;
+        glRenderMode(GL_SELECT);
+        display();
+        RenderMode = GL_RENDER;
+        n_hits = glRenderMode(GL_RENDER);
+      }
 
       int i;
       int index = 0;
@@ -543,7 +554,7 @@ void mouse(int button, int state, int x, int y)
     // From the picking tutorial.
     Ymouse = y;
     Xmouse = x;
-    clear_picking_buffer();
+    // clear_picking_buffer();
     glutPostRedisplay();
   }
 }
