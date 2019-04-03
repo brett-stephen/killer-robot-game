@@ -301,7 +301,8 @@ void renderCity()
 
 void display(void)
 {
-  usleep(50000);
+  // Slow down rendering to prevent hyperspeed antenna rotation
+  usleep(10000);
 
   /* Projection transformation */
   glMatrixMode(GL_PROJECTION);
