@@ -9,7 +9,7 @@ Keyboard controls:
 - s: turn around
 - r: reset to origin
 - F2: move head 45 deg left
-- F3: move head 45 def right
+- F3: move head 45 deg right
 - F4: default camera angle
 - F5: back left camera angle
 - F6: back right camera angle
