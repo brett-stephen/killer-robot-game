@@ -429,9 +429,16 @@ void init(void)
 
   /* select clearing color 	*/
   glClearColor(0.3, 0.53, 0.92, 0.0);
-  glShadeModel(GL_FLAT);
   glEnable(GL_DEPTH_TEST);
   RenderMode = GL_RENDER;
+
+  // Enable lighting - no normals are set, though.
+  GLfloat light_position[] = { 1.0, 1.0, 1.0, 1.0 };
+  glShadeModel (GL_SMOOTH);
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_COLOR_MATERIAL);
 }
 
 void reshape(int w, int h)
